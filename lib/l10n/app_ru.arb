@@ -1,0 +1,21 @@
+{
+    "@@locale": "ru",
+    "welcomeBack": "С возвращением,",
+    "totalBalance": "Общий баланс (USD)",
+    "deposit": "Депозит",
+    "withdraw": "Вывод",
+    "trade": "Торговля",
+    "transfer": "Перевод",
+    "massiveGrowth": "ЛИДЕРЫ РОСТА СЕГОДНЯ",
+    "liveUpdates": "Обновления",
+    "marketOverview": "Обзор рынка",
+    "vol24h": "Объем 24ч",
+    "home": "Главная",
+    "wallet": "Кошелек",
+    "profile": "Профиль",
+    "buy": "Купить",
+    "sell": "Продать",
+    "limitOrder": "Лимитный ордер",
+    "price": "Цена (USD)",
+    "amount": "Количество"
+}

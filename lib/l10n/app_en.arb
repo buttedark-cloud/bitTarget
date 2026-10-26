@@ -1,0 +1,21 @@
+{
+    "@@locale": "en",
+    "welcomeBack": "Welcome back,",
+    "totalBalance": "Total Balance (USD)",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "trade": "Trade",
+    "transfer": "Transfer",
+    "massiveGrowth": "MASSIVE GROWTH TODAY",
+    "liveUpdates": "Live Updates",
+    "marketOverview": "Market Overview",
+    "vol24h": "Vol 24h",
+    "home": "Home",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "buy": "Buy",
+    "sell": "Sell",
+    "limitOrder": "Limit Order",
+    "price": "Price (USD)",
+    "amount": "Amount"
+}

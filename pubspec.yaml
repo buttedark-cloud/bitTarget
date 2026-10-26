@@ -1,0 +1,36 @@
+name: bittarget
+description: "A new Flutter project."
+
+publish_to: 'none' 
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  web_socket_channel: ^2.4.0
+  intl: any
+  google_fonts: ^6.2.1
+  cupertino_icons: ^1.0.8
+  dio: ^5.11.1
+  flutter_bloc: ^9.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+
+flutter:
+
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/logo.png
