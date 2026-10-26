@@ -205,6 +205,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount'**
   String get amount;
+
+  /// No description provided for @selectAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Asset'**
+  String get selectAsset;
+
+  /// No description provided for @realtimeBinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time Binance data'**
+  String get realtimeBinance;
+
+  /// No description provided for @marketLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load market'**
+  String get marketLoadError;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @tradeScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade Screen'**
+  String get tradeScreen;
+
+  /// No description provided for @walletScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Screen'**
+  String get walletScreen;
+
+  /// No description provided for @yourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile'**
+  String get yourProfile;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get todayLabel;
 }
 
 class _AppLocalizationsDelegate

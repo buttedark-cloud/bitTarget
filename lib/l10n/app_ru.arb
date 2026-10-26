@@ -17,5 +17,13 @@
     "sell": "Продать",
     "limitOrder": "Лимитный ордер",
     "price": "Цена (USD)",
-    "amount": "Количество"
+    "amount": "Количество",
+    "selectAsset": "Выберите актив",
+    "realtimeBinance": "Данные Binance в реальном времени",
+    "marketLoadError": "Не удалось загрузить рынок",
+    "retry": "Повторить",
+    "tradeScreen": "Экран торговли",
+    "walletScreen": "Экран кошелька",
+    "yourProfile": "Ваш профиль",
+    "todayLabel": "за 24 часа"
 }

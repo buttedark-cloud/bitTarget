@@ -17,5 +17,13 @@
     "sell": "Sell",
     "limitOrder": "Limit Order",
     "price": "Price (USD)",
-    "amount": "Amount"
+    "amount": "Amount",
+    "selectAsset": "Select Asset",
+    "realtimeBinance": "Real-time Binance data",
+    "marketLoadError": "Could not load market",
+    "retry": "Retry",
+    "tradeScreen": "Trade Screen",
+    "walletScreen": "Wallet Screen",
+    "yourProfile": "Your Profile",
+    "todayLabel": "today"
 }

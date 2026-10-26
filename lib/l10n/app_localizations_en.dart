@@ -62,4 +62,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amount => 'Amount';
+
+  @override
+  String get selectAsset => 'Select Asset';
+
+  @override
+  String get realtimeBinance => 'Real-time Binance data';
+
+  @override
+  String get marketLoadError => 'Could not load market';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get tradeScreen => 'Trade Screen';
+
+  @override
+  String get walletScreen => 'Wallet Screen';
+
+  @override
+  String get yourProfile => 'Your Profile';
+
+  @override
+  String get todayLabel => 'today';
 }

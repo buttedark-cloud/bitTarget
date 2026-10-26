@@ -62,4 +62,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get amount => 'Количество';
+
+  @override
+  String get selectAsset => 'Выберите актив';
+
+  @override
+  String get realtimeBinance => 'Данные Binance в реальном времени';
+
+  @override
+  String get marketLoadError => 'Не удалось загрузить рынок';
+
+  @override
+  String get retry => 'Повторить';
+
+  @override
+  String get tradeScreen => 'Экран торговли';
+
+  @override
+  String get walletScreen => 'Экран кошелька';
+
+  @override
+  String get yourProfile => 'Ваш профиль';
+
+  @override
+  String get todayLabel => 'за 24 часа';
 }

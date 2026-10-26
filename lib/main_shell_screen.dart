@@ -1,8 +1,11 @@
 import 'package:bittarget/core/constants/app_colors.dart';
+import 'package:bittarget/core/locale/locale_cubit.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/core/widgets/base_screen_layout.dart';
 import 'package:bittarget/features/home/presentation/screens/home_screen.dart';
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -13,7 +16,6 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen> {
   int _currentIndex = 0;
-  bool _isEnglish = true; // Глобальное состояние языка для оболочки
   late final PageController _pageController;
 
   @override
@@ -28,12 +30,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
     super.dispose();
   }
 
-  void _toggleLanguage() {
-    setState(() {
-      _isEnglish = !_isEnglish;
-    });
-  }
-
   void _goToProfile() {
     setState(() {
       _currentIndex = 3;
@@ -44,21 +40,23 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   Widget build(BuildContext context) {
     // Формируем список экранов с передачей текущего языка
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
     final List<Widget> screens = [
-      HomeScreen(isEnglish: _isEnglish, onLanguageToggle: _toggleLanguage, onProfileTap: _goToProfile),
+      HomeScreen(isEnglish: isEnglish, onLanguageToggle: () => context.read<LocaleCubit>().toggle(), onProfileTap: _goToProfile),
       BaseScreenLayout(
         child: Center(
-          child: Text(_isEnglish ? 'Trade Screen' : 'Экран Торговли', style: const TextStyle(color: Colors.white, fontSize: 20)),
+          child: Text(l10n.tradeScreen, style: const TextStyle(color: Colors.white, fontSize: 20)),
         ),
       ),
       BaseScreenLayout(
         child: Center(
-          child: Text(_isEnglish ? 'Wallet Screen' : 'Экран Кошелька', style: const TextStyle(color: Colors.white, fontSize: 20)),
+          child: Text(l10n.walletScreen, style: const TextStyle(color: Colors.white, fontSize: 20)),
         ),
       ),
       BaseScreenLayout(
         child: Center(
-          child: Text(_isEnglish ? 'Your Profile' : 'Ваш Профиль', style: const TextStyle(color: Colors.white, fontSize: 20)),
+          child: Text(l10n.yourProfile, style: const TextStyle(color: Colors.white, fontSize: 20)),
         ),
       ),
     ];
@@ -107,10 +105,10 @@ class _MainShellScreenState extends State<MainShellScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildNavItem(Icons.home_rounded, _isEnglish ? 'Home' : 'Главная', 0),
-                      _buildNavItem(Icons.bar_chart_rounded, _isEnglish ? 'Trade' : 'Торговля', 1),
-                      _buildNavItem(Icons.account_balance_wallet_rounded, _isEnglish ? 'Wallet' : 'Кошелек', 2),
-                      _buildNavItem(Icons.person_rounded, _isEnglish ? 'Profile' : 'Профиль', 3),
+                      _buildNavItem(Icons.home_rounded, l10n.home, 0),
+                      _buildNavItem(Icons.bar_chart_rounded, l10n.trade, 1),
+                      _buildNavItem(Icons.account_balance_wallet_rounded, l10n.wallet, 2),
+                      _buildNavItem(Icons.person_rounded, l10n.profile, 3),
                     ],
                   ),
                 ),

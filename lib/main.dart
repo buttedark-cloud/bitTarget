@@ -1,5 +1,7 @@
+import 'package:bittarget/core/locale/locale_cubit.dart';
 import 'package:bittarget/features/home/data/crypto_api_service.dart';
 import 'package:bittarget/features/home/presentation/cubit/market_cubit.dart';
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:bittarget/main_shell_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,12 +22,18 @@ class CryptoTrackerApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => WalletCubit()),
         BlocProvider(create: (_) => MarketCubit(CryptoApiService())..loadMarket()),
+        BlocProvider(create: (_) => LocaleCubit()),
       ],
-      child: MaterialApp(
-        title: 'BitTarget',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const MainShellScreen(), // <-- Запускаем через обертку с нижним баром
+      child: BlocBuilder<LocaleCubit, Locale>(
+        builder: (context, locale) => MaterialApp(
+          title: 'BitTarget',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.darkTheme,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const MainShellScreen(),
+        ),
       ),
     );
   }
