@@ -9,6 +9,8 @@ abstract class MarketState {}
 
 class MarketLoading extends MarketState {}
 
+class MarketError extends MarketState {}
+
 class MarketLoaded extends MarketState {
   final List<CryptoAsset> assets;
   final CryptoAsset selectedAsset; // Выбранная монета для большого графика
@@ -23,23 +25,29 @@ class MarketCubit extends Cubit<MarketState> {
   MarketCubit(this._apiService) : super(MarketLoading());
 
   Future<void> loadMarket() async {
-    final assets = await _apiService.fetchMarketData();
-    if (assets.isNotEmpty) {
-      // По умолчанию выбираем BTC для главного графика
-      final btc = assets.firstWhere((element) => element.symbol == 'BTC', orElse: () => assets.first);
+    emit(MarketLoading());
+    try {
+      final assets = await _apiService.fetchMarketData();
+      final btc = assets.firstWhere((a) => a.symbol == 'BTC', orElse: () => assets.first);
       emit(MarketLoaded(assets: assets, selectedAsset: btc));
+      _startPolling();
+    } catch (_) {
+      emit(MarketError());
     }
+  }
 
-    // Периодический опрос бэкенда для обновления цен в реальном времени
+  void _startPolling() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      final updatedAssets = await _apiService.fetchMarketData();
-      if (updatedAssets.isNotEmpty && state is MarketLoaded) {
-        final currentSelected = (state as MarketLoaded).selectedAsset;
-        final newSelected = updatedAssets.firstWhere(
-          (element) => element.symbol == currentSelected.symbol,
-          orElse: () => updatedAssets.first,
-        );
-        emit(MarketLoaded(assets: updatedAssets, selectedAsset: newSelected));
+      try {
+        final updated = await _apiService.fetchMarketData();
+        if (isClosed || state is! MarketLoaded) return;
+
+        final selected = (state as MarketLoaded).selectedAsset;
+        final newSelected = updated.firstWhere((a) => a.symbol == selected.symbol, orElse: () => updated.first);
+        emit(MarketLoaded(assets: updated, selectedAsset: newSelected));
+      } catch (_) {
+        // Сбой одного обновления не страшен: на экране остаются прошлые цены
       }
     });
   }

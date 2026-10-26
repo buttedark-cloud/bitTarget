@@ -38,7 +38,7 @@ class BaseScreenLayout extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.neonGreen,
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: AppColors.neonGreen.withOpacity(0.6), blurRadius: 6, spreadRadius: 1)],
+                        boxShadow: [BoxShadow(color: AppColors.neonGreen.withValues(alpha: 0.6), blurRadius: 6, spreadRadius: 1)],
                       ),
                     ),
                     const SizedBox(width: 8),

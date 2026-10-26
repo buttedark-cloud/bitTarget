@@ -102,7 +102,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                     color: const Color.fromARGB(255, 5, 5, 5),
                     borderRadius: BorderRadius.circular(16),
                     border: const Border(top: BorderSide(color: Color.fromARGB(255, 72, 77, 73), width: 1.0)),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 10))],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

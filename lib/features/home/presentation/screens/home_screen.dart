@@ -1,7 +1,7 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/core/widgets/base_screen_layout.dart';
-import 'package:bittarget/features/home/data/crypto_api_service.dart';
+import 'package:bittarget/features/wallet/cubit/wallet_cubit.dart';
 import 'package:bittarget/features/wallet/wallet_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +20,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MarketCubit(CryptoApiService())..loadMarket(),
+    return BaseScreenLayout(
       child: BaseScreenLayout(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -133,8 +132,27 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // БАЛАНС ЧЕЛОВЕКА СВЕРХУ (как на макете!)
-              const WalletSummaryCard(isEnglish: true, totalUsd: 84920.50, btcEquivalent: 1.284502),
+              Builder(
+                builder: (context) {
+                  final wallet = context.watch<WalletCubit>().state;
+                  final market = context.watch<MarketCubit>().state;
 
+                  // Доллары + все монеты по текущим ценам + USDT (он стоит $1)
+                  double total = wallet.usdBalance + wallet.getAssetBalance('USDT');
+                  double btcPrice = 0;
+
+                  if (market is MarketLoaded) {
+                    for (final asset in market.assets) {
+                      total += wallet.getAssetBalance(asset.symbol) * asset.price;
+                      if (asset.symbol == 'BTC') btcPrice = asset.price;
+                    }
+                  }
+
+                  final btcEquivalent = btcPrice > 0 ? total / btcPrice : 0.0;
+
+                  return WalletSummaryCard(isEnglish: isEnglish, totalUsd: total, btcEquivalent: btcEquivalent);
+                },
+              ),
               const SizedBox(height: 24),
 
               // БЛОК РЫНКА С ДАННЫМИ С БЭКА
@@ -198,7 +216,21 @@ class HomeScreen extends StatelessWidget {
                       ],
                     );
                   }
-
+                  if (state is MarketError) {
+                    return Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 40),
+                          Text(isEnglish ? 'Could not load market' : 'Не удалось загрузить рынок', style: AppTypography.bodyLarge),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () => context.read<MarketCubit>().loadMarket(),
+                            child: Text(isEnglish ? 'Retry' : 'Повторить'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                   return const SizedBox.shrink();
                 },
               ),
