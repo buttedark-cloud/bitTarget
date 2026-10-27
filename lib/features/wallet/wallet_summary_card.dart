@@ -50,38 +50,63 @@ class WalletSummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildActionButton(Icons.arrow_downward, l10n.deposit, highlighted: true),
-              _buildActionButton(Icons.arrow_upward, l10n.withdraw),
-              _buildActionButton(Icons.swap_horiz, l10n.trade),
-              _buildActionButton(Icons.send_rounded, l10n.transfer),
+              _ActionButton(icon: Icons.arrow_downward, label: l10n.deposit),
+              _ActionButton(icon: Icons.arrow_upward, label: l10n.withdraw),
+              _ActionButton(icon: Icons.swap_horiz, label: l10n.trade),
+              _ActionButton(icon: Icons.send_rounded, label: l10n.transfer),
             ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildActionButton(IconData icon, String label, {bool highlighted = false}) {
+// Серая стеклянная кнопка, которая загорается зелёным, пока её держат нажатой
+class _ActionButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+
+  const _ActionButton({required this.icon, required this.label});
+
+  @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const duration = Duration(milliseconds: 150);
+
     return PressEffect(
       scale: 0.9,
+      onPressedChanged: (value) => setState(() => _pressed = value),
       child: Column(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: duration,
             width: 52,
             height: 52,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: highlighted ? AppColors.neonGreen : Colors.white.withValues(alpha: 0.06),
+              color: _pressed ? AppColors.neonGreen : Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
-              border: highlighted ? null : Border.all(color: Colors.white.withValues(alpha: 0.10)),
-              boxShadow: highlighted
-                  ? [BoxShadow(color: AppColors.neonGreen.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))]
-                  : null,
+              border: Border.all(color: _pressed ? Colors.transparent : Colors.white.withValues(alpha: 0.10)),
+              boxShadow: _pressed
+                  ? [BoxShadow(color: AppColors.neonGreen.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))]
+                  : const [],
             ),
-            child: Icon(icon, color: highlighted ? Colors.black : Colors.white, size: 24),
+            child: TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: _pressed ? Colors.black : Colors.white),
+              duration: duration,
+              builder: (_, color, _) => Icon(widget.icon, color: color, size: 24),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            label,
+            widget.label,
             style: AppTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
           ),
         ],
