@@ -86,4 +86,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get todayLabel => 'за 24 часа';
+
+  @override
+  String get high24h => 'Макс. за 24ч';
 }

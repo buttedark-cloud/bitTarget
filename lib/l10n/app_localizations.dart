@@ -253,6 +253,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'today'**
   String get todayLabel;
+
+  /// No description provided for @high24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h High'**
+  String get high24h;
 }
 
 class _AppLocalizationsDelegate

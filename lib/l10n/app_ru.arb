@@ -25,5 +25,6 @@
     "tradeScreen": "Экран торговли",
     "walletScreen": "Экран кошелька",
     "yourProfile": "Ваш профиль",
-    "todayLabel": "за 24 часа"
+    "todayLabel": "за 24 часа",
+    "high24h": "Макс. за 24ч"
 }

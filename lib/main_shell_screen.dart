@@ -6,6 +6,7 @@ import 'package:bittarget/features/home/presentation/screens/home_screen.dart';
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bittarget/core/widgets/press_effect.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -99,7 +100,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                     color: const Color.fromARGB(255, 5, 5, 5),
                     borderRadius: BorderRadius.circular(16),
                     border: const Border(top: BorderSide(color: Color.fromARGB(255, 72, 77, 73), width: 1.0)),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 10))],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -121,8 +122,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isActive = _currentIndex == index;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return PressEffect(
+      scale: 0.9,
       onTap: () {
         setState(() {
           _currentIndex = index;

@@ -86,4 +86,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayLabel => 'today';
+
+  @override
+  String get high24h => '24h High';
 }

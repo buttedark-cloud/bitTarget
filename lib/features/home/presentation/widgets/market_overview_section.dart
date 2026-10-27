@@ -1,5 +1,10 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
+import 'package:bittarget/core/utils/format.dart';
+import 'package:bittarget/core/widgets/coin_icon.dart';
+import 'package:bittarget/core/widgets/glass_card.dart';
+import 'package:bittarget/core/widgets/neon_chart.dart';
+import 'package:bittarget/core/widgets/press_effect.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -32,53 +37,61 @@ class MarketOverviewSection extends StatelessWidget {
           itemCount: assets.length,
           itemBuilder: (context, index) {
             final asset = assets[index];
-            return GestureDetector(
-              onTap: () => onAssetTap(asset),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Image.network(
-                          asset.iconUrl,
-                          width: 36,
-                          height: 36,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.currency_bitcoin, color: AppColors.neonGreen),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
+            final color = asset.isPositive ? AppColors.neonGreen : AppColors.neonRed;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: PressEffect(
+                onTap: () => onAssetTap(asset),
+                child: GlassCard(
+                  radius: 16,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  child: Row(
+                    children: [
+                      CoinIcon(symbol: asset.symbol, size: 36),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 4,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(isEn ? asset.nameEn : asset.nameRu, style: AppTypography.bodyLarge),
+                            Text(
+                              isEn ? asset.nameEn : asset.nameRu,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodyLarge,
+                            ),
                             const SizedBox(height: 2),
                             Text(asset.pair, style: AppTypography.caption),
                           ],
                         ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('\$${asset.price.toStringAsFixed(2)}', style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${asset.isPositive ? '+' : ''}${asset.changePercent.toStringAsFixed(2)}%',
-                          style: AppTypography.caption.copyWith(
-                            color: asset.isPositive ? AppColors.neonGreen : AppColors.neonRed,
-                            fontWeight: FontWeight.w700,
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: NeonChart(
+                            points: asset.sparkline,
+                            isPositive: asset.isPositive,
+                            height: 30,
+                            strokeWidth: 1.8,
+                            showFill: false,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(formatUsd(asset.price), style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${asset.isPositive ? '+' : '-'}${asset.changePercent.toStringAsFixed(2)}%',
+                            style: AppTypography.caption.copyWith(color: color, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

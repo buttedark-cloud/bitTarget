@@ -25,5 +25,6 @@
     "tradeScreen": "Trade Screen",
     "walletScreen": "Wallet Screen",
     "yourProfile": "Your Profile",
-    "todayLabel": "today"
+    "todayLabel": "today",
+    "high24h": "24h High"
 }

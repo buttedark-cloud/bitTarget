@@ -3,13 +3,13 @@ class CryptoAsset {
   final String nameRu;
   final String nameEn;
   final String pair;
-  double price;
-  double changePercent;
+  final double price;
+  final double changePercent;
   final bool isPositive;
-  final String iconUrl;
-  final List<double> sparkline; // Данные для графика
+  final double high24h;
+  final List<double> sparkline;
 
-  CryptoAsset({
+  const CryptoAsset({
     required this.symbol,
     required this.nameRu,
     required this.nameEn,
@@ -17,11 +17,11 @@ class CryptoAsset {
     required this.price,
     required this.changePercent,
     required this.isPositive,
-    required this.iconUrl,
+    required this.high24h,
     required this.sparkline,
   });
 
-  CryptoAsset copyWith({double? price, double? changePercent, bool? isPositive, List<double>? sparkline}) {
+  CryptoAsset copyWith({double? price, double? changePercent, bool? isPositive, double? high24h, List<double>? sparkline}) {
     return CryptoAsset(
       symbol: symbol,
       nameRu: nameRu,
@@ -30,7 +30,7 @@ class CryptoAsset {
       price: price ?? this.price,
       changePercent: changePercent ?? this.changePercent,
       isPositive: isPositive ?? this.isPositive,
-      iconUrl: iconUrl,
+      high24h: high24h ?? this.high24h,
       sparkline: sparkline ?? this.sparkline,
     );
   }

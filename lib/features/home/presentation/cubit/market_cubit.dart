@@ -12,91 +12,77 @@ class MarketError extends MarketState {}
 
 class MarketLoaded extends MarketState {
   final List<CryptoAsset> assets;
-  final CryptoAsset selectedAsset; // монета для большого графика
+  final CryptoAsset selectedAsset;
 
   MarketLoaded({required this.assets, required this.selectedAsset});
 }
 
 class MarketCubit extends Cubit<MarketState> {
-  final CryptoApiService _apiService;
+  final CryptoApiService _api;
   Timer? _timer;
+  Map<String, List<double>> _charts = {};
 
-  MarketCubit(this._apiService) : super(MarketLoading());
+  MarketCubit(this._api) : super(MarketLoading());
 
   Future<void> loadMarket() async {
     emit(MarketLoading());
     try {
-      final assets = await _apiService.fetchMarketData();
-      final btc = assets.firstWhere((a) => a.symbol == 'BTC', orElse: () => assets.first);
-      final chart = await _loadChart(btc.symbol);
-
+      final assets = await _api.fetchMarketData();
+      await _loadCharts(assets);
       if (isClosed) return;
-      emit(
-        MarketLoaded(
-          assets: assets,
-          selectedAsset: btc.copyWith(sparkline: chart),
-        ),
-      );
+
+      final withCharts = _applyCharts(assets);
+      final btc = withCharts.firstWhere((a) => a.symbol == 'BTC', orElse: () => withCharts.first);
+      emit(MarketLoaded(assets: withCharts, selectedAsset: btc));
       _startPolling();
     } catch (_) {
       if (!isClosed) emit(MarketError());
     }
   }
 
-  // Если график не загрузился, это не повод ломать весь экран: вернём пустой список
-  Future<List<double>> _loadChart(String symbol) async {
+  // Если график одной монеты не загрузился, остальное продолжает работать
+  Future<MapEntry<String, List<double>>> _chartFor(String symbol) async {
     try {
-      return await _apiService.fetchSparkline(symbol);
+      return MapEntry(symbol, await _api.fetchSparkline(symbol));
     } catch (_) {
-      return [];
+      return MapEntry(symbol, <double>[]);
     }
+  }
+
+  Future<void> _loadCharts(List<CryptoAsset> assets) async {
+    final results = await Future.wait(assets.map((a) => _chartFor(a.symbol)));
+    _charts = Map.fromEntries(results);
+  }
+
+  // Подставляем графики и двигаем последнюю точку к текущей цене
+  List<CryptoAsset> _applyCharts(List<CryptoAsset> assets) {
+    return assets.map((a) {
+      final chart = _charts[a.symbol] ?? const <double>[];
+      if (chart.isEmpty) return a;
+      return a.copyWith(sparkline: [...chart.sublist(0, chart.length - 1), a.price]);
+    }).toList();
   }
 
   void _startPolling() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
       try {
-        final updated = await _apiService.fetchMarketData();
+        final updated = _applyCharts(await _api.fetchMarketData());
         if (isClosed || state is! MarketLoaded) return;
 
         final selected = (state as MarketLoaded).selectedAsset;
         final fresh = updated.firstWhere((a) => a.symbol == selected.symbol, orElse: () => updated.first);
-
-        // Оставляем загруженный график, но последнюю точку двигаем к текущей цене
-        var chart = selected.sparkline;
-        if (chart.isNotEmpty) {
-          chart = [...chart.sublist(0, chart.length - 1), fresh.price];
-        }
-
-        emit(
-          MarketLoaded(
-            assets: updated,
-            selectedAsset: fresh.copyWith(sparkline: chart),
-          ),
-        );
+        emit(MarketLoaded(assets: updated, selectedAsset: fresh));
       } catch (_) {
-        // Сбой одного обновления не страшен: на экране остаются прошлые цены
+        // Сбой одного обновления не страшен: остаются прошлые цены
       }
     });
   }
 
-  Future<void> selectAsset(CryptoAsset asset) async {
+  void selectAsset(CryptoAsset asset) {
     final current = state;
     if (current is! MarketLoaded) return;
-
-    // Сразу показываем выбранную монету, график подгрузится следом
     emit(MarketLoaded(assets: current.assets, selectedAsset: asset));
-
-    final chart = await _loadChart(asset.symbol);
-
-    final now = state;
-    if (isClosed || now is! MarketLoaded || now.selectedAsset.symbol != asset.symbol) return;
-    emit(
-      MarketLoaded(
-        assets: now.assets,
-        selectedAsset: now.selectedAsset.copyWith(sparkline: chart),
-      ),
-    );
   }
 
   @override
