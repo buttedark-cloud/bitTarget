@@ -1,26 +1,28 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
-
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class MarketOverviewSection extends StatelessWidget {
-  final bool isEnglish;
   final List<CryptoAsset> assets;
   final ValueChanged<CryptoAsset> onAssetTap;
 
-  const MarketOverviewSection({super.key, required this.isEnglish, required this.assets, required this.onAssetTap});
+  const MarketOverviewSection({super.key, required this.assets, required this.onAssetTap});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(isEnglish ? 'MARKET OVERVIEW' : 'ОБЗОР РЫНКА', style: AppTypography.titleLarge),
-            Text(isEnglish ? 'Volume 24h' : 'Том 24 ч', style: AppTypography.caption),
+            Text(l10n.marketOverview.toUpperCase(), style: AppTypography.titleLarge),
+            Text(l10n.vol24h, style: AppTypography.caption),
           ],
         ),
         const SizedBox(height: 12),
@@ -55,7 +57,7 @@ class MarketOverviewSection extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(isEnglish ? asset.nameEn : asset.nameRu, style: AppTypography.bodyLarge),
+                            Text(isEn ? asset.nameEn : asset.nameRu, style: AppTypography.bodyLarge),
                             const SizedBox(height: 2),
                             Text(asset.pair, style: AppTypography.caption),
                           ],

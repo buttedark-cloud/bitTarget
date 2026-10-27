@@ -1,19 +1,21 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
-
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class MarketHeroCard extends StatelessWidget {
-  final bool isEnglish;
   final CryptoAsset asset;
   final List<CryptoAsset> allAssets;
   final ValueChanged<CryptoAsset> onAssetSelected;
 
-  const MarketHeroCard({super.key, required this.isEnglish, required this.asset, required this.allAssets, required this.onAssetSelected});
+  const MarketHeroCard({super.key, required this.asset, required this.allAssets, required this.onAssetSelected});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -44,10 +46,7 @@ class MarketHeroCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              isEnglish ? asset.nameEn : asset.nameRu,
-                              style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700),
-                            ),
+                            Text(isEn ? asset.nameEn : asset.nameRu, style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
                             const SizedBox(width: 4),
                             const Icon(Icons.arrow_drop_down, color: AppColors.neonGreen),
                           ],
@@ -74,7 +73,7 @@ class MarketHeroCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text('\$${asset.price.toStringAsFixed(2)}', style: AppTypography.displayLarge.copyWith(fontSize: 32, color: Colors.white)),
           const SizedBox(height: 4),
-          Text(isEnglish ? 'Real-time Binance data' : 'Данные Binance в реальном времени', style: AppTypography.caption),
+          Text(l10n.realtimeBinance, style: AppTypography.caption),
           const SizedBox(height: 16),
           SizedBox(
             height: 70,
@@ -87,32 +86,35 @@ class MarketHeroCard extends StatelessWidget {
   }
 
   void _showAssetSelector(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF121214),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           padding: const EdgeInsets.all(20),
           height: 400,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(isEnglish ? 'Select Asset' : 'Выберите актив', style: AppTypography.titleLarge),
+              Text(l10n.selectAsset, style: AppTypography.titleLarge),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.builder(
                   itemCount: allAssets.length,
-                  itemBuilder: (context, index) {
+                  itemBuilder: (_, index) {
                     final item = allAssets[index];
                     return ListTile(
                       leading: Image.network(item.iconUrl, width: 30, height: 30, errorBuilder: (_, __, ___) => const SizedBox()),
-                      title: Text(isEnglish ? item.nameEn : item.nameRu, style: AppTypography.bodyLarge),
+                      title: Text(isEn ? item.nameEn : item.nameRu, style: AppTypography.bodyLarge),
                       subtitle: Text(item.pair, style: AppTypography.caption),
                       trailing: Text('\$${item.price.toStringAsFixed(2)}', style: AppTypography.bodyLarge),
                       onTap: () {
                         onAssetSelected(item);
-                        Navigator.pop(context);
+                        Navigator.pop(sheetContext);
                       },
                     );
                   },
@@ -134,7 +136,7 @@ class NeonChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (points.isEmpty) return;
+    if (points.length < 2) return;
     final color = isPositive ? AppColors.neonGreen : AppColors.neonRed;
 
     final paintLine = Paint()

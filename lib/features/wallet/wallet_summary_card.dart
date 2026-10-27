@@ -1,16 +1,18 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class WalletSummaryCard extends StatelessWidget {
-  final bool isEnglish;
   final double totalUsd;
   final double btcEquivalent;
 
-  const WalletSummaryCard({super.key, required this.isEnglish, required this.totalUsd, required this.btcEquivalent});
+  const WalletSummaryCard({super.key, required this.totalUsd, required this.btcEquivalent});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -25,11 +27,11 @@ class WalletSummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(isEnglish ? 'Total balance (USD)' : 'Общий баланс (USD)', style: AppTypography.caption),
+              Text(l10n.totalBalance, style: AppTypography.caption),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: AppColors.neonGreen.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                child: Text('+24,8% ${isEnglish ? 'today' : 'за 24 часа'}', style: AppTypography.badgeGreen),
+                child: Text('+24,8% ${l10n.todayLabel}', style: AppTypography.badgeGreen),
               ),
             ],
           ),
@@ -39,14 +41,14 @@ class WalletSummaryCard extends StatelessWidget {
           Text('≈ ${btcEquivalent.toStringAsFixed(6)} BTC', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: 20),
 
-          // Круглые кнопки действий (строго без квадратов!)
+          // Круглые кнопки действий
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildActionButton(Icons.arrow_downward, isEnglish ? 'Deposit' : 'Вклад'),
-              _buildActionButton(Icons.arrow_upward, isEnglish ? 'Withdraw' : 'Отзывать'),
-              _buildActionButton(Icons.swap_horiz, isEnglish ? 'Trade' : 'Торговля'),
-              _buildActionButton(Icons.send_rounded, isEnglish ? 'Transfer' : 'Передача'),
+              _buildActionButton(Icons.arrow_downward, l10n.deposit),
+              _buildActionButton(Icons.arrow_upward, l10n.withdraw),
+              _buildActionButton(Icons.swap_horiz, l10n.trade),
+              _buildActionButton(Icons.send_rounded, l10n.transfer),
             ],
           ),
         ],

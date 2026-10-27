@@ -39,11 +39,10 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Формируем список экранов с передачей текущего языка
     final l10n = AppLocalizations.of(context)!;
-    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+
     final List<Widget> screens = [
-      HomeScreen(isEnglish: isEnglish, onLanguageToggle: () => context.read<LocaleCubit>().toggle(), onProfileTap: _goToProfile),
+      HomeScreen(onLanguageToggle: () => context.read<LocaleCubit>().toggle(), onProfileTap: _goToProfile),
       BaseScreenLayout(
         child: Center(
           child: Text(l10n.tradeScreen, style: const TextStyle(color: Colors.white, fontSize: 20)),
@@ -88,7 +87,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                 ),
               ),
 
-              // Плавающий нижний бар (Аппбар) с двуязычными названиями
+              // Плавающий нижний бар
               Positioned(
                 left: 20,
                 right: 20,
@@ -100,7 +99,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                     color: const Color.fromARGB(255, 5, 5, 5),
                     borderRadius: BorderRadius.circular(16),
                     border: const Border(top: BorderSide(color: Color.fromARGB(255, 72, 77, 73), width: 1.0)),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 10))],
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10))],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
