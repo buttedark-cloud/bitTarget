@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bittarget/features/home/data/crypto_api_service.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class MarketState {}
@@ -13,7 +12,7 @@ class MarketError extends MarketState {}
 
 class MarketLoaded extends MarketState {
   final List<CryptoAsset> assets;
-  final CryptoAsset selectedAsset; // Выбранная монета для большого графика
+  final CryptoAsset selectedAsset; // монета для большого графика
 
   MarketLoaded({required this.assets, required this.selectedAsset});
 }
@@ -29,10 +28,27 @@ class MarketCubit extends Cubit<MarketState> {
     try {
       final assets = await _apiService.fetchMarketData();
       final btc = assets.firstWhere((a) => a.symbol == 'BTC', orElse: () => assets.first);
-      emit(MarketLoaded(assets: assets, selectedAsset: btc));
+      final chart = await _loadChart(btc.symbol);
+
+      if (isClosed) return;
+      emit(
+        MarketLoaded(
+          assets: assets,
+          selectedAsset: btc.copyWith(sparkline: chart),
+        ),
+      );
       _startPolling();
     } catch (_) {
-      emit(MarketError());
+      if (!isClosed) emit(MarketError());
+    }
+  }
+
+  // Если график не загрузился, это не повод ломать весь экран: вернём пустой список
+  Future<List<double>> _loadChart(String symbol) async {
+    try {
+      return await _apiService.fetchSparkline(symbol);
+    } catch (_) {
+      return [];
     }
   }
 
@@ -44,19 +60,43 @@ class MarketCubit extends Cubit<MarketState> {
         if (isClosed || state is! MarketLoaded) return;
 
         final selected = (state as MarketLoaded).selectedAsset;
-        final newSelected = updated.firstWhere((a) => a.symbol == selected.symbol, orElse: () => updated.first);
-        emit(MarketLoaded(assets: updated, selectedAsset: newSelected));
+        final fresh = updated.firstWhere((a) => a.symbol == selected.symbol, orElse: () => updated.first);
+
+        // Оставляем загруженный график, но последнюю точку двигаем к текущей цене
+        var chart = selected.sparkline;
+        if (chart.isNotEmpty) {
+          chart = [...chart.sublist(0, chart.length - 1), fresh.price];
+        }
+
+        emit(
+          MarketLoaded(
+            assets: updated,
+            selectedAsset: fresh.copyWith(sparkline: chart),
+          ),
+        );
       } catch (_) {
         // Сбой одного обновления не страшен: на экране остаются прошлые цены
       }
     });
   }
 
-  void selectAsset(CryptoAsset asset) {
-    if (state is MarketLoaded) {
-      final currentState = state as MarketLoaded;
-      emit(MarketLoaded(assets: currentState.assets, selectedAsset: asset));
-    }
+  Future<void> selectAsset(CryptoAsset asset) async {
+    final current = state;
+    if (current is! MarketLoaded) return;
+
+    // Сразу показываем выбранную монету, график подгрузится следом
+    emit(MarketLoaded(assets: current.assets, selectedAsset: asset));
+
+    final chart = await _loadChart(asset.symbol);
+
+    final now = state;
+    if (isClosed || now is! MarketLoaded || now.selectedAsset.symbol != asset.symbol) return;
+    emit(
+      MarketLoaded(
+        assets: now.assets,
+        selectedAsset: now.selectedAsset.copyWith(sparkline: chart),
+      ),
+    );
   }
 
   @override
