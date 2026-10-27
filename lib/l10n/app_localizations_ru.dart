@@ -89,4 +89,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get high24h => 'Макс. за 24ч';
+
+  @override
+  String get low24h => 'Минимум 24ч';
+
+  @override
+  String get total => 'Итого';
+
+  @override
+  String get priceUsdt => 'Цена (USDT)';
+
+  @override
+  String get orderBookPrice => 'Цена';
+
+  @override
+  String get orderBookSize => 'Объём';
+
+  @override
+  String get orderInvalid => 'Введите корректную цену и количество';
+
+  @override
+  String get orderPriceFar => 'Цена отличается от рыночной больше чем на 5%';
+
+  @override
+  String get orderNoFunds => 'Недостаточно средств';
+
+  @override
+  String get orderFilled => 'Ордер исполнен';
 }

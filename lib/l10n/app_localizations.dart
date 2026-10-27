@@ -259,6 +259,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'24h High'**
   String get high24h;
+
+  /// No description provided for @low24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h Low'**
+  String get low24h;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @priceUsdt.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (USDT)'**
+  String get priceUsdt;
+
+  /// No description provided for @orderBookPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get orderBookPrice;
+
+  /// No description provided for @orderBookSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get orderBookSize;
+
+  /// No description provided for @orderInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price and amount'**
+  String get orderInvalid;
+
+  /// No description provided for @orderPriceFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Price is more than 5% away from the market'**
+  String get orderPriceFar;
+
+  /// No description provided for @orderNoFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough funds'**
+  String get orderNoFunds;
+
+  /// No description provided for @orderFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Order filled'**
+  String get orderFilled;
 }
 
 class _AppLocalizationsDelegate

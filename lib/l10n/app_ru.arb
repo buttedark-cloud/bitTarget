@@ -26,5 +26,14 @@
     "walletScreen": "Экран кошелька",
     "yourProfile": "Ваш профиль",
     "todayLabel": "за 24 часа",
-    "high24h": "Макс. за 24ч"
+    "high24h": "Макс. за 24ч",
+    "low24h": "Минимум 24ч",
+    "total": "Итого",
+    "priceUsdt": "Цена (USDT)",
+    "orderBookPrice": "Цена",
+    "orderBookSize": "Объём",
+    "orderInvalid": "Введите корректную цену и количество",
+    "orderPriceFar": "Цена отличается от рыночной больше чем на 5%",
+    "orderNoFunds": "Недостаточно средств",
+    "orderFilled": "Ордер исполнен"
 }

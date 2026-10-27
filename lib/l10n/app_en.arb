@@ -26,5 +26,15 @@
     "walletScreen": "Wallet Screen",
     "yourProfile": "Your Profile",
     "todayLabel": "today",
-    "high24h": "24h High"
+    "high24h": "24h High",
+    "low24h": "24h Low",
+    "total": "Total",
+    "priceUsdt": "Price (USDT)",
+    "orderBookPrice": "Price",
+    "orderBookSize": "Size",
+    "orderInvalid": "Enter a valid price and amount",
+    "orderPriceFar": "Price is more than 5% away from the market",
+    "orderNoFunds": "Not enough funds",
+    "orderFilled": "Order filled"
+    
 }

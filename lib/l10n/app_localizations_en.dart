@@ -89,4 +89,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get high24h => '24h High';
+
+  @override
+  String get low24h => '24h Low';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get priceUsdt => 'Price (USDT)';
+
+  @override
+  String get orderBookPrice => 'Price';
+
+  @override
+  String get orderBookSize => 'Size';
+
+  @override
+  String get orderInvalid => 'Enter a valid price and amount';
+
+  @override
+  String get orderPriceFar => 'Price is more than 5% away from the market';
+
+  @override
+  String get orderNoFunds => 'Not enough funds';
+
+  @override
+  String get orderFilled => 'Order filled';
 }

@@ -62,6 +62,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
     ];
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
