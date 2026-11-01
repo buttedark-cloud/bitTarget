@@ -2,25 +2,90 @@ import 'dart:math' as math;
 
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
+import 'package:bittarget/core/utils/format.dart';
 import 'package:bittarget/features/trade/data/trade_models.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
-class TradeChart extends StatelessWidget {
+// Поля вокруг области графика (для подписей осей); нужны и виджету, и рисовальщику
+const double _kLeft = 48;
+const double _kRight = 12;
+const double _kTop = 10;
+const double _kBottom = 24;
+const int _kMaPeriod = 7;
+
+class TradeChart extends StatefulWidget {
   final List<Candle> candles;
   final bool isUp;
   final bool showMa;
+  final bool showDots;
   final String interval;
   final double height;
 
-  const TradeChart({super.key, required this.candles, required this.isUp, required this.showMa, required this.interval, this.height = 230});
+  const TradeChart({
+    super.key,
+    required this.candles,
+    required this.isUp,
+    required this.showMa,
+    required this.showDots,
+    required this.interval,
+    this.height = 230,
+  });
+
+  @override
+  State<TradeChart> createState() => _TradeChartState();
+}
+
+class _TradeChartState extends State<TradeChart> {
+  // Выбранная точка хранится по времени, а не по номеру: график двигается, номера съезжают
+  DateTime? _selectedTime;
+
+  @override
+  void didUpdateWidget(covariant TradeChart old) {
+    super.didUpdateWidget(old);
+    if (old.interval != widget.interval) _selectedTime = null;
+  }
+
+  // Какая точка ближе всего к месту касания
+  void _select(double dx, double width, {bool toggle = false}) {
+    final n = widget.candles.length;
+    if (n < 2) return;
+
+    final areaWidth = width - _kLeft - _kRight;
+    final t = ((dx - _kLeft) / areaWidth).clamp(0.0, 1.0);
+    final time = widget.candles[(t * (n - 1)).round()].time;
+
+    setState(() => _selectedTime = (toggle && _selectedTime == time) ? null : time);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: CustomPaint(painter: _TradeChartPainter(candles, isUp, showMa, interval)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final selected = _selectedTime == null ? -1 : widget.candles.indexWhere((c) => c.time == _selectedTime);
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapUp: (d) => _select(d.localPosition.dx, width, toggle: true),
+          onHorizontalDragStart: (d) => _select(d.localPosition.dx, width),
+          onHorizontalDragUpdate: (d) => _select(d.localPosition.dx, width),
+          child: SizedBox(
+            height: widget.height,
+            width: double.infinity,
+            child: CustomPaint(
+              painter: _TradeChartPainter(
+                widget.candles,
+                widget.isUp,
+                widget.showMa,
+                widget.showDots,
+                widget.interval,
+                selected >= 0 ? selected : null,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -29,15 +94,11 @@ class _TradeChartPainter extends CustomPainter {
   final List<Candle> candles;
   final bool isUp;
   final bool showMa;
+  final bool showDots;
   final String interval;
+  final int? selectedIndex;
 
-  _TradeChartPainter(this.candles, this.isUp, this.showMa, this.interval);
-
-  static const double _left = 48;
-  static const double _right = 12;
-  static const double _top = 10;
-  static const double _bottom = 24;
-  static const int _maPeriod = 7;
+  _TradeChartPainter(this.candles, this.isUp, this.showMa, this.showDots, this.interval, this.selectedIndex);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -45,7 +106,7 @@ class _TradeChartPainter extends CustomPainter {
     if (n < 2) return;
 
     final color = isUp ? AppColors.neonGreen : AppColors.neonRed;
-    final area = Rect.fromLTRB(_left, _top, size.width - _right, size.height - _bottom);
+    final area = Rect.fromLTRB(_kLeft, _kTop, size.width - _kRight, size.height - _kBottom);
 
     final closes = candles.map((c) => c.close).toList();
     final minV = closes.reduce(math.min);
@@ -69,7 +130,7 @@ class _TradeChartPainter extends CustomPainter {
       final value = lo + span * i / 4;
       final y = yOf(value);
       canvas.drawLine(Offset(area.left, y), Offset(area.right, y), gridPaint);
-      _label(canvas, yFormat.format(value), Offset(_left - 8, y), size.width, alignRight: true);
+      _label(canvas, yFormat.format(value), Offset(_kLeft - 8, y), size.width, alignRight: true);
 
       final idx = ((n - 1) * i / 4).round();
       final x = xOf(idx);
@@ -102,11 +163,11 @@ class _TradeChartPainter extends CustomPainter {
     canvas.drawPath(
       line,
       Paint()
-        ..color = color.withValues(alpha: 0.35)
+        ..color = color.withValues(alpha: 0.18)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 5
+        ..strokeWidth = 7
         ..strokeJoin = StrokeJoin.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+        ..strokeCap = StrokeCap.round,
     );
     canvas.drawPath(
       line,
@@ -119,12 +180,12 @@ class _TradeChartPainter extends CustomPainter {
     );
 
     // Скользящая средняя (MA)
-    if (showMa && n >= _maPeriod) {
+    if (showMa && n >= _kMaPeriod) {
       final ma = Path();
-      for (int i = _maPeriod - 1; i < n; i++) {
-        final avg = closes.sublist(i - _maPeriod + 1, i + 1).reduce((a, b) => a + b) / _maPeriod;
+      for (int i = _kMaPeriod - 1; i < n; i++) {
+        final avg = closes.sublist(i - _kMaPeriod + 1, i + 1).reduce((a, b) => a + b) / _kMaPeriod;
         final p = Offset(xOf(i), yOf(avg));
-        if (i == _maPeriod - 1) {
+        if (i == _kMaPeriod - 1) {
           ma.moveTo(p.dx, p.dy);
         } else {
           ma.lineTo(p.dx, p.dy);
@@ -140,15 +201,66 @@ class _TradeChartPainter extends CustomPainter {
       );
     }
 
-    // Точки на линии и выделенная последняя точка
+    // Точки на линии (их можно скрыть в настройках) и выделенная последняя точка
     final dot = Paint()..color = color;
-    final step = math.max(1, ((n - 1) / 8).round());
-    for (int i = 0; i < n; i += step) {
-      canvas.drawCircle(Offset(xOf(i), yOf(closes[i])), 3, dot);
+    if (showDots) {
+      final step = math.max(1, ((n - 1) / 8).round());
+      for (int i = 0; i < n; i += step) {
+        canvas.drawCircle(Offset(xOf(i), yOf(closes[i])), 3, dot);
+      }
     }
     final last = Offset(xOf(n - 1), yOf(closes.last));
     canvas.drawCircle(last, 7, Paint()..color = color.withValues(alpha: 0.25));
     canvas.drawCircle(last, 4, dot);
+
+    // Выбранная точка: вертикальная линия и окошко с ценой и временем
+    final sel = selectedIndex;
+    if (sel != null && sel >= 0 && sel < n) {
+      final p = Offset(xOf(sel), yOf(closes[sel]));
+
+      canvas.drawLine(
+        Offset(p.dx, area.top),
+        Offset(p.dx, area.bottom),
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.35)
+          ..strokeWidth = 1,
+      );
+      canvas.drawCircle(p, 7, Paint()..color = Colors.white.withValues(alpha: 0.9));
+      canvas.drawCircle(p, 4.5, Paint()..color = color);
+
+      final timeFormat = interval == '1d' ? DateFormat('dd.MM.yyyy') : DateFormat('dd.MM HH:mm');
+      final priceTp = TextPainter(
+        text: TextSpan(
+          text: formatUsd(closes[sel]),
+          style: AppTypography.bodyLarge.copyWith(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final timeTp = TextPainter(
+        text: TextSpan(text: timeFormat.format(candles[sel].time), style: AppTypography.caption.copyWith(fontSize: 10)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final w = math.max(priceTp.width, timeTp.width) + 20;
+      final h = priceTp.height + timeTp.height + 12;
+      final left = (p.dx - w / 2).clamp(area.left, math.max(area.left, area.right - w)).toDouble();
+
+      // Окошко сверху; если точка у самого верха, переносим его ниже, чтобы не закрывать точку
+      var top = area.top + 4;
+      if (p.dy < top + h + 8) top = math.min(p.dy + 14, area.bottom - h);
+
+      final box = RRect.fromRectAndRadius(Rect.fromLTWH(left, top, w, h), const Radius.circular(8));
+      canvas.drawRRect(box, Paint()..color = const Color(0xFF161B18));
+      canvas.drawRRect(
+        box,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..color = color.withValues(alpha: 0.6),
+      );
+      priceTp.paint(canvas, Offset(left + (w - priceTp.width) / 2, top + 5));
+      timeTp.paint(canvas, Offset(left + (w - timeTp.width) / 2, top + 5 + priceTp.height + 2));
+    }
   }
 
   // Сколько знаков после запятой нужно подписям, чтобы они не повторялись
@@ -177,5 +289,10 @@ class _TradeChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TradeChartPainter old) =>
-      old.candles != candles || old.isUp != isUp || old.showMa != showMa || old.interval != interval;
+      old.candles != candles ||
+      old.isUp != isUp ||
+      old.showMa != showMa ||
+      old.showDots != showDots ||
+      old.interval != interval ||
+      old.selectedIndex != selectedIndex;
 }

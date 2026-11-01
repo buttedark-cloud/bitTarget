@@ -2,60 +2,126 @@ import 'dart:async';
 
 import 'package:bittarget/features/trade/data/trade_models.dart';
 import 'package:bittarget/features/trade/data/trade_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum TradeStatus { loading, ready, error }
 
 class TradeState {
   final TradeStatus status;
+  final String symbol;
   final String interval;
   final List<Candle> candles;
   final TickerData? ticker;
   final OrderBook? orderBook;
+  final Set<String> favorites;
+  final bool showMa;
+  final bool showDots;
+  final String? error; // текст последней ошибки загрузки
 
-  const TradeState({this.status = TradeStatus.loading, this.interval = '15m', this.candles = const [], this.ticker, this.orderBook});
+  const TradeState({
+    this.status = TradeStatus.loading,
+    this.symbol = 'BTC',
+    this.interval = '15m',
+    this.candles = const [],
+    this.ticker,
+    this.orderBook,
+    this.favorites = const {},
+    this.showMa = false,
+    this.showDots = true,
+    this.error,
+  });
 
-  TradeState copyWith({TradeStatus? status, String? interval, List<Candle>? candles, TickerData? ticker, OrderBook? orderBook}) {
+  TradeState copyWith({
+    TradeStatus? status,
+    String? symbol,
+    String? interval,
+    List<Candle>? candles,
+    TickerData? ticker,
+    OrderBook? orderBook,
+    Set<String>? favorites,
+    bool? showMa,
+    bool? showDots,
+    String? error,
+    bool clearError = false,
+  }) {
     return TradeState(
       status: status ?? this.status,
+      symbol: symbol ?? this.symbol,
       interval: interval ?? this.interval,
       candles: candles ?? this.candles,
       ticker: ticker ?? this.ticker,
       orderBook: orderBook ?? this.orderBook,
+      favorites: favorites ?? this.favorites,
+      showMa: showMa ?? this.showMa,
+      showDots: showDots ?? this.showDots,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
 class TradeCubit extends Cubit<TradeState> {
   static const int candleLimit = 48;
+  static const Duration _requestTimeout = Duration(seconds: 15);
 
   final TradeService _service;
-  final String symbol;
 
   StreamSubscription<TickerData>? _tickerSub;
   StreamSubscription<Candle>? _klineSub;
   StreamSubscription<OrderBook>? _depthSub;
   Timer? _reconnectTimer;
 
-  TradeCubit(this._service, {this.symbol = 'BTC'}) : super(const TradeState());
+  // Видна ли вкладка торговли. Пока не видна, сокеты закрыты
+  bool _active;
 
-  String get pair => '$symbol/USDT';
+  TradeCubit(this._service, {String symbol = 'BTC', bool active = true}) : _active = active, super(TradeState(symbol: symbol));
+
+  String get symbol => state.symbol;
+  String get pair => '${state.symbol}/USDT';
 
   Future<void> load({String? interval}) async {
+    final sym = state.symbol;
     final tf = interval ?? state.interval;
     _stopStreams();
-    emit(state.copyWith(status: TradeStatus.loading, interval: tf));
+    emit(state.copyWith(status: TradeStatus.loading, interval: tf, clearError: true));
+    debugPrint('TradeCubit.load start: $sym $tf');
 
+    var step = 'candles';
     try {
-      final (candles, ticker) = await (_service.fetchCandles(symbol, tf, limit: candleLimit), _service.fetchTicker(symbol)).wait;
+      // Шаги идут по очереди, чтобы в ошибке было видно, на каком именно всё сломалось
+      final candles = await _service.fetchCandles(sym, tf, limit: candleLimit).timeout(_requestTimeout);
+      debugPrint('TradeCubit.load candles ok: ${candles.length}');
+      step = 'ticker';
+      final ticker = await _service.fetchTicker(sym).timeout(_requestTimeout);
+      debugPrint('TradeCubit.load ticker ok: ${ticker.price}');
 
-      // Если за это время закрыли экран или выбрали другой таймфрейм, ответ устарел
-      if (isClosed || state.interval != tf) return;
+      // Если за это время закрыли экран или выбрали другую монету или таймфрейм, ответ устарел
+      if (isClosed || state.symbol != sym || state.interval != tf) {
+        debugPrint('TradeCubit.load result dropped (stale)');
+        return;
+      }
 
-      emit(state.copyWith(status: TradeStatus.ready, candles: candles, ticker: ticker));
-      _startStreams();
-    } catch (_) {
-      if (!isClosed && state.interval == tf) emit(state.copyWith(status: TradeStatus.error));
+      emit(state.copyWith(status: TradeStatus.ready, candles: candles, ticker: ticker, clearError: true));
+      if (_active) _startStreams();
+    } catch (e, st) {
+      debugPrint('TradeCubit.load failed at $step: $e\n$st');
+      if (!isClosed && state.symbol == sym && state.interval == tf) {
+        var text = '$step: $e';
+        if (text.length > 300) text = text.substring(0, 300);
+        emit(state.copyWith(status: TradeStatus.error, error: text));
+      }
+    }
+  }
+
+  // Вкладка ушла на задний план: закрываем сокеты. Вернулись: данные устарели, грузим заново
+  void setActive(bool active) {
+    if (active == _active) return;
+    _active = active;
+
+    if (!active) {
+      _stopStreams();
+    } else if (state.ticker != null || state.status == TradeStatus.error) {
+      load();
     }
   }
 
@@ -63,20 +129,40 @@ class TradeCubit extends Cubit<TradeState> {
     if (tf != state.interval) load(interval: tf);
   }
 
+  // Смена монеты: сбрасываем старые данные, чтобы не показывать цены прошлой монеты
+  void selectSymbol(String newSymbol) {
+    if (newSymbol == state.symbol) return;
+    _stopStreams();
+    emit(
+      TradeState(symbol: newSymbol, interval: state.interval, favorites: state.favorites, showMa: state.showMa, showDots: state.showDots),
+    );
+    load();
+  }
+
+  void toggleFavorite(String symbol) {
+    final next = {...state.favorites};
+    if (!next.remove(symbol)) next.add(symbol);
+    emit(state.copyWith(favorites: next));
+  }
+
+  void toggleMa() => emit(state.copyWith(showMa: !state.showMa));
+
+  void toggleDots() => emit(state.copyWith(showDots: !state.showDots));
+
   void _startStreams() {
     _stopStreams();
     _tickerSub = _service
-        .tickerStream(symbol)
+        .tickerStream(state.symbol)
         .listen(
           (t) => emit(state.copyWith(ticker: t)),
           onError: (_) => _scheduleReconnect(),
           onDone: _scheduleReconnect,
         );
     _klineSub = _service
-        .klineStream(symbol, state.interval)
+        .klineStream(state.symbol, state.interval)
         .listen(_onKline, onError: (_) => _scheduleReconnect(), onDone: _scheduleReconnect);
     _depthSub = _service
-        .depthStream(symbol)
+        .depthStream(state.symbol)
         .listen(
           (b) => emit(state.copyWith(orderBook: b)),
           onError: (_) => _scheduleReconnect(),
@@ -94,11 +180,11 @@ class TradeCubit extends Cubit<TradeState> {
     _depthSub = null;
   }
 
-  // Связь оборвалась: через 3 секунды пробуем подключиться снова
+  // Связь оборвалась: через 3 секунды пробуем подключиться снова (только если вкладка активна)
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 3), () {
-      if (!isClosed) _startStreams();
+      if (!isClosed && _active) _startStreams();
     });
   }
 

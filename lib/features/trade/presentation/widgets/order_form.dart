@@ -1,12 +1,12 @@
 import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
+import 'package:bittarget/core/utils/decimal_input_formatter.dart';
 import 'package:bittarget/core/utils/format.dart';
 import 'package:bittarget/core/widgets/glass_card.dart';
 import 'package:bittarget/core/widgets/press_effect.dart';
 import 'package:bittarget/features/wallet/cubit/wallet_cubit.dart';
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OrderForm extends StatefulWidget {
@@ -24,6 +24,7 @@ class _OrderFormState extends State<OrderForm> {
   late final TextEditingController _priceCtrl;
   final TextEditingController _amountCtrl = TextEditingController();
   bool _isBuy = true;
+  bool _isMarket = false;
 
   @override
   void initState() {
@@ -44,19 +45,23 @@ class _OrderFormState extends State<OrderForm> {
 
   void _refresh() => setState(() {});
 
+  // Цена, с которой работает форма: рыночная (живая) или введённая вручную
+  double get _priceValue => _isMarket ? widget.marketPrice : (double.tryParse(_priceCtrl.text) ?? 0);
+
   void _onPicked() {
     final p = widget.pickedPrice.value;
-    if (p != null) _priceCtrl.text = formatPrice(p);
+    if (p == null) return;
+    _priceCtrl.text = formatPrice(p);
+    if (_isMarket) setState(() => _isMarket = false); // выбрали свою цену, значит это лимитный ордер
   }
 
   // Проценты от баланса, с округлением вниз до 6 знаков (столько хранит кошелёк)
   void _applyPercent(double fraction) {
     final wallet = context.read<WalletCubit>().state;
-    final price = double.tryParse(_priceCtrl.text);
+    final price = _priceValue;
     int micro;
 
     if (_isBuy) {
-      if (price == null || price <= 0) return;
       final priceCents = (price * 100).round();
       if (priceCents <= 0) return;
       micro = (wallet.usdBalanceCents * fraction * 1000000 / priceCents).floor();
@@ -69,16 +74,16 @@ class _OrderFormState extends State<OrderForm> {
 
   void _submit() {
     final l10n = AppLocalizations.of(context)!;
-    final price = double.tryParse(_priceCtrl.text);
+    final price = _priceValue;
     final amount = double.tryParse(_amountCtrl.text);
 
-    if (price == null || amount == null || price <= 0 || (amount * 1000000).round() < 1) {
+    if (amount == null || price <= 0 || (amount * 1000000).round() < 1) {
       _toast(l10n.orderInvalid);
       return;
     }
 
-    // Защита от «цены с потолка»: не дальше 5% от рынка
-    if ((price - widget.marketPrice).abs() / widget.marketPrice > 0.05) {
+    // Для лимитного ордера: защита от «цены с потолка», не дальше 5% от рынка
+    if (!_isMarket && (price - widget.marketPrice).abs() / widget.marketPrice > 0.05) {
       _toast(l10n.orderPriceFar);
       return;
     }
@@ -108,10 +113,81 @@ class _OrderFormState extends State<OrderForm> {
       );
   }
 
+  void _setMarket(bool market) {
+    // Возвращаясь к лимитному режиму, подставляем текущую рыночную цену как стартовую
+    if (!market) _priceCtrl.text = formatPrice(widget.marketPrice);
+    setState(() => _isMarket = market);
+  }
+
+  void _showOrderTypeSheet() {
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF121214),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.orderType, style: AppTypography.titleLarge),
+              const SizedBox(height: 14),
+              _typeOption(sheetContext, l10n.limitOrder, l10n.limitDesc, market: false),
+              const SizedBox(height: 10),
+              _typeOption(sheetContext, l10n.marketOrder, l10n.marketDesc, market: true),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _typeOption(BuildContext sheetContext, String title, String desc, {required bool market}) {
+    final selected = _isMarket == market;
+
+    return PressEffect(
+      scale: 0.98,
+      onTap: () {
+        _setMarket(market);
+        Navigator.pop(sheetContext);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.neonGreen.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? AppColors.neonGreen : Colors.white.withValues(alpha: 0.10)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTypography.bodyLarge.copyWith(fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Text(desc, style: AppTypography.caption.copyWith(fontSize: 11)),
+                ],
+              ),
+            ),
+            if (selected)
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(Icons.check_circle_rounded, color: AppColors.neonGreen),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final price = double.tryParse(_priceCtrl.text) ?? 0;
+    final price = _priceValue;
     final amount = double.tryParse(_amountCtrl.text) ?? 0;
     final accent = _isBuy ? AppColors.neonGreen : AppColors.neonRed;
 
@@ -123,15 +199,29 @@ class _OrderFormState extends State<OrderForm> {
         children: [
           _sideToggle(l10n),
           const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.limitOrder, style: AppTypography.bodyLarge.copyWith(fontSize: 13)),
-              const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary, size: 20),
-            ],
+          // Тип ордера: нажми, чтобы выбрать лимитный или рыночный
+          PressEffect(
+            scale: 0.98,
+            onTap: _showOrderTypeSheet,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_isMarket ? l10n.marketOrder : l10n.limitOrder, style: AppTypography.bodyLarge.copyWith(fontSize: 13)),
+                      const SizedBox(height: 2),
+                      Text(_isMarket ? l10n.marketHint : l10n.limitHint, style: AppTypography.caption.copyWith(fontSize: 10)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.neonGreen, size: 22),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
-          _field(l10n.priceUsdt, _priceCtrl),
+          if (_isMarket) _marketPriceBox(l10n.marketPrice) else _field(l10n.priceUsdt, _priceCtrl),
           const SizedBox(height: 12),
           _field('${l10n.amount} (${widget.symbol})', _amountCtrl),
           const SizedBox(height: 10),
@@ -202,6 +292,32 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  // В рыночном режиме цену не вводят: показываем живую рыночную
+  Widget _marketPriceBox(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTypography.caption),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(formatPrice(widget.marketPrice), style: AppTypography.bodyLarge.copyWith(fontSize: 14, color: Colors.white70)),
+              const Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.textSecondary),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _sideToggle(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(3),
@@ -253,7 +369,7 @@ class _OrderFormState extends State<OrderForm> {
         TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [_DecimalFormatter()],
+          inputFormatters: [DecimalInputFormatter()],
           cursorColor: AppColors.neonGreen,
           style: AppTypography.bodyLarge.copyWith(fontSize: 14),
           decoration: InputDecoration(
@@ -268,15 +384,5 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ],
     );
-  }
-}
-
-// Разрешает только число с одной точкой; запятую с русской клавиатуры превращает в точку
-class _DecimalFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(',', '.');
-    if (!RegExp(r'^\d*\.?\d*$').hasMatch(text)) return oldValue;
-    return newValue.copyWith(text: text);
   }
 }

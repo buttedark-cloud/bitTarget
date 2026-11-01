@@ -116,4 +116,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderFilled => 'Order filled';
+
+  @override
+  String get walletTitle => 'Asset Wallet';
+
+  @override
+  String get estimatedNetWorth => 'Estimated Net Worth';
+
+  @override
+  String get profit24h => '24h Profit';
+
+  @override
+  String get assetAllocation => 'Asset Allocation';
+
+  @override
+  String get assetsWord => 'Assets';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String get allTransactions => 'All Transactions';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get noTransactions => 'No transactions yet';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get networkFee => 'Network Fee';
+
+  @override
+  String get txStaking => 'Staking Rewards';
+
+  @override
+  String get convert => 'Convert';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get walletAddress => 'Wallet address';
+
+  @override
+  String get invalidAmount => 'Enter a valid amount';
+
+  @override
+  String get invalidAddress => 'Enter a valid wallet address';
+
+  @override
+  String get operationDone => 'Done';
+
+  @override
+  String get searchCoin => 'Search coin';
+
+  @override
+  String get chartSettings => 'Chart settings';
+
+  @override
+  String get showPoints => 'Show points';
+
+  @override
+  String get showMa => 'Moving average (MA)';
+
+  @override
+  String get orderType => 'Order type';
+
+  @override
+  String get marketOrder => 'Market Order';
+
+  @override
+  String get marketPrice => 'Market price';
+
+  @override
+  String get limitHint => 'You set the price';
+
+  @override
+  String get marketHint => 'Instantly at the market price';
+
+  @override
+  String get limitDesc =>
+      'You set the price yourself. In this demo it fills instantly if the price is within 5% of the market.';
+
+  @override
+  String get marketDesc => 'Fills instantly at the current market price.';
 }

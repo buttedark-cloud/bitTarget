@@ -313,6 +313,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order filled'**
   String get orderFilled;
+
+  /// No description provided for @walletTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset Wallet'**
+  String get walletTitle;
+
+  /// No description provided for @estimatedNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Net Worth'**
+  String get estimatedNetWorth;
+
+  /// No description provided for @profit24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h Profit'**
+  String get profit24h;
+
+  /// No description provided for @assetAllocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset Allocation'**
+  String get assetAllocation;
+
+  /// No description provided for @assetsWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get assetsWord;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @recentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get recentTransactions;
+
+  /// No description provided for @allTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'All Transactions'**
+  String get allTransactions;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @noTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get noTransactions;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @networkFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Network Fee'**
+  String get networkFee;
+
+  /// No description provided for @txStaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Staking Rewards'**
+  String get txStaking;
+
+  /// No description provided for @convert.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert'**
+  String get convert;
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @walletAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet address'**
+  String get walletAddress;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get invalidAmount;
+
+  /// No description provided for @invalidAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid wallet address'**
+  String get invalidAddress;
+
+  /// No description provided for @operationDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get operationDone;
+
+  /// No description provided for @searchCoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Search coin'**
+  String get searchCoin;
+
+  /// No description provided for @chartSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart settings'**
+  String get chartSettings;
+
+  /// No description provided for @showPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Show points'**
+  String get showPoints;
+
+  /// No description provided for @showMa.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving average (MA)'**
+  String get showMa;
+
+  /// No description provided for @orderType.
+  ///
+  /// In en, this message translates to:
+  /// **'Order type'**
+  String get orderType;
+
+  /// No description provided for @marketOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Order'**
+  String get marketOrder;
+
+  /// No description provided for @marketPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Market price'**
+  String get marketPrice;
+
+  /// No description provided for @limitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You set the price'**
+  String get limitHint;
+
+  /// No description provided for @marketHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instantly at the market price'**
+  String get marketHint;
+
+  /// No description provided for @limitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You set the price yourself. In this demo it fills instantly if the price is within 5% of the market.'**
+  String get limitDesc;
+
+  /// No description provided for @marketDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fills instantly at the current market price.'**
+  String get marketDesc;
 }
 
 class _AppLocalizationsDelegate

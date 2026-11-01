@@ -1,13 +1,26 @@
 part of 'wallet_cubit.dart';
 
-class TransactionModel {
-  final String title;
-  final String subtitle;
-  final String amount;
-  final bool isIncome;
-  final String date;
+enum TxType { buy, sell, depositUsd, depositCrypto, withdrawUsd, transfer, reward }
 
-  TransactionModel({required this.title, required this.subtitle, required this.amount, required this.isIncome, required this.date});
+class TransactionModel {
+  final TxType type;
+  final String symbol; // 'USD' для долларов
+  final double amount; // количество в единицах symbol (всегда положительное)
+  final double usd; // сумма в долларах
+  final double fee; // комиссия в долларах
+  final DateTime time;
+
+  const TransactionModel({
+    required this.type,
+    required this.symbol,
+    required this.amount,
+    required this.usd,
+    this.fee = 0,
+    required this.time,
+  });
+
+  // Прибавилось ли у пользователя то, что записано в symbol
+  bool get isIncome => type == TxType.buy || type == TxType.depositUsd || type == TxType.depositCrypto || type == TxType.reward;
 }
 
 class WalletState {
@@ -17,7 +30,6 @@ class WalletState {
 
   const WalletState({required this.usdBalanceCents, required this.portfolioMicro, required this.transactions});
 
-  // Удобные геттеры для UI (безопасный перевод из int)
   double get usdBalance => usdBalanceCents / 100.0;
 
   double getAssetBalance(String symbol) {
@@ -25,7 +37,6 @@ class WalletState {
     return microAmount / 1000000.0;
   }
 
-  // Копирование состояния для обновления
   WalletState copyWith({int? usdBalanceCents, Map<String, int>? portfolioMicro, List<TransactionModel>? transactions}) {
     return WalletState(
       usdBalanceCents: usdBalanceCents ?? this.usdBalanceCents,

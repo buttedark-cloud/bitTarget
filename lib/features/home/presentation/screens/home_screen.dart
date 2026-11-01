@@ -75,7 +75,7 @@ class HomeScreen extends StatelessWidget {
                               const SizedBox(height: 2),
                               Row(
                                 children: [
-                                  Text('Алекс Трейдер', style: AppTypography.bodyLarge.copyWith(fontSize: 15)),
+                                  Text('Alex Trader', style: AppTypography.bodyLarge.copyWith(fontSize: 15)),
                                   const SizedBox(width: 4),
                                   const Icon(Icons.verified_rounded, color: AppColors.neonGreen, size: 15),
                                 ],

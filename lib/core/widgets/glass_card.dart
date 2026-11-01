@@ -31,7 +31,7 @@ class GlassCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Слабое зелёное свечение только у правого нижнего края
+              // Зелёное свечение у правого нижнего края
               if (glow)
                 Positioned.fill(
                   child: DecoratedBox(
@@ -62,19 +62,24 @@ class _GlassBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final rrect = RRect.fromRectAndRadius(rect.deflate(0.5), Radius.circular(radius));
+    final rrect = RRect.fromRectAndRadius(rect.deflate(0.75), Radius.circular(radius));
 
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: glow
-            ? [Colors.white.withValues(alpha: 0.10), Colors.white.withValues(alpha: 0.05), AppColors.neonGreen.withValues(alpha: 0.35)]
-            : [Colors.white.withValues(alpha: 0.09), Colors.white.withValues(alpha: 0.05)],
-        stops: glow ? const [0.0, 0.55, 1.0] : null,
-      ).createShader(rect);
+    final paint = Paint()..style = PaintingStyle.stroke;
+
+    if (glow) {
+      // Сплошная зелёная обводка по всему периметру
+      paint
+        ..strokeWidth = 1.5
+        ..color = AppColors.neonGreen.withValues(alpha: 0.6);
+    } else {
+      paint
+        ..strokeWidth = 1
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white.withValues(alpha: 0.09), Colors.white.withValues(alpha: 0.05)],
+        ).createShader(rect);
+    }
 
     canvas.drawRRect(rrect, paint);
   }

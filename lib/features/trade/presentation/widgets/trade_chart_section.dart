@@ -7,24 +7,17 @@ import 'package:bittarget/features/trade/presentation/widgets/trade_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TradeChartSection extends StatefulWidget {
+class TradeChartSection extends StatelessWidget {
   final TradeState state;
 
   const TradeChartSection({super.key, required this.state});
-
-  @override
-  State<TradeChartSection> createState() => _TradeChartSectionState();
-}
-
-class _TradeChartSectionState extends State<TradeChartSection> {
-  bool _showMa = false;
 
   // (значение для Binance, подпись на экране)
   static const _intervals = [('15m', '15m'), ('1h', '1h'), ('4h', '4h'), ('1d', '1D')];
 
   @override
   Widget build(BuildContext context) {
-    final state = widget.state;
+    final cubit = context.read<TradeCubit>();
     final candles = state.candles;
     final isUp = candles.length < 2 || candles.last.close >= candles.first.close;
 
@@ -40,7 +33,7 @@ class _TradeChartSectionState extends State<TradeChartSection> {
                   Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: PressEffect(
-                      onTap: () => context.read<TradeCubit>().selectInterval(value),
+                      onTap: () => cubit.selectInterval(value),
                       child: Text(
                         label,
                         style: AppTypography.bodyLarge.copyWith(
@@ -54,7 +47,7 @@ class _TradeChartSectionState extends State<TradeChartSection> {
             ),
             Row(
               children: [
-                _chip('MA', active: _showMa, onTap: () => setState(() => _showMa = !_showMa)),
+                _chip('MA', active: state.showMa, onTap: cubit.toggleMa),
                 const SizedBox(width: 6),
                 _chip('RSI', enabled: false),
                 const SizedBox(width: 6),
@@ -70,7 +63,7 @@ class _TradeChartSectionState extends State<TradeChartSection> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              TradeChart(candles: candles, isUp: isUp, showMa: _showMa, interval: state.interval),
+              TradeChart(candles: candles, isUp: isUp, showMa: state.showMa, showDots: state.showDots, interval: state.interval),
               if (state.status == TradeStatus.loading)
                 const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(color: AppColors.neonGreen, strokeWidth: 2)),
             ],

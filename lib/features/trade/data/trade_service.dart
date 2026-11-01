@@ -6,7 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class TradeService {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+  BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)),
+);
 
   static const _rest = 'https://api.binance.com/api/v3';
   static const _ws = 'wss://stream.binance.com:9443/ws';

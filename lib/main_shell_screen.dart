@@ -2,11 +2,13 @@ import 'package:bittarget/core/constants/app_colors.dart';
 import 'package:bittarget/core/locale/locale_cubit.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/core/widgets/base_screen_layout.dart';
+import 'package:bittarget/core/widgets/press_effect.dart';
 import 'package:bittarget/features/home/presentation/screens/home_screen.dart';
+import 'package:bittarget/features/trade/presentation/screens/trade_screen.dart';
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bittarget/core/widgets/press_effect.dart';
+import 'package:bittarget/features/wallet/presentation/screens/wallet_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -31,11 +33,26 @@ class _MainShellScreenState extends State<MainShellScreen> {
     super.dispose();
   }
 
-  void _goToProfile() {
-    setState(() {
-      _currentIndex = 3;
-    });
-    _pageController.animateToPage(3, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+  void _goToPage(int index) {
+    if (index == _currentIndex) return;
+    final distance = (index - _currentIndex).abs();
+    setState(() => _currentIndex = index);
+
+    if (distance > 1) {
+      // Не проматываем промежуточные страницы, чтобы не строить их зря
+      _pageController.jumpToPage(index);
+    } else {
+      _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    }
+  }
+
+  // Заглушка: BaseScreenLayout нужен только ей, у Home и Trade он уже внутри
+  Widget _stub(String text) {
+    return BaseScreenLayout(
+      child: Center(
+        child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 20)),
+      ),
+    );
   }
 
   @override
@@ -43,22 +60,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     final List<Widget> screens = [
-      HomeScreen(onLanguageToggle: () => context.read<LocaleCubit>().toggle(), onProfileTap: _goToProfile),
-      BaseScreenLayout(
-        child: Center(
-          child: Text(l10n.tradeScreen, style: const TextStyle(color: Colors.white, fontSize: 20)),
-        ),
+      _KeepAlive(
+        child: HomeScreen(onLanguageToggle: () => context.read<LocaleCubit>().toggle(), onProfileTap: () => _goToPage(3)),
       ),
-      BaseScreenLayout(
-        child: Center(
-          child: Text(l10n.walletScreen, style: const TextStyle(color: Colors.white, fontSize: 20)),
-        ),
-      ),
-      BaseScreenLayout(
-        child: Center(
-          child: Text(l10n.yourProfile, style: const TextStyle(color: Colors.white, fontSize: 20)),
-        ),
-      ),
+      _KeepAlive(child: TradeScreen(isActive: _currentIndex == 1)),
+      const _KeepAlive(child: WalletScreen()),
+      _KeepAlive(child: _stub(l10n.yourProfile)),
     ];
 
     return Scaffold(
@@ -75,21 +82,14 @@ class _MainShellScreenState extends State<MainShellScreen> {
         child: SafeArea(
           child: Stack(
             children: [
-              // Свайпаемые экраны
               Padding(
                 padding: const EdgeInsets.only(bottom: 80.0),
                 child: PageView(
                   controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
+                  onPageChanged: (index) => setState(() => _currentIndex = index),
                   children: screens,
                 ),
               ),
-
-              // Плавающий нижний бар
               Positioned(
                 left: 20,
                 right: 20,
@@ -125,12 +125,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
     final isActive = _currentIndex == index;
     return PressEffect(
       scale: 0.9,
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-        _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-      },
+      onTap: () => _goToPage(index),
       child: SizedBox(
         width: 65,
         child: Column(
@@ -149,5 +144,26 @@ class _MainShellScreenState extends State<MainShellScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Не даёт PageView уничтожать страницу при свайпе.
+/// Благодаря этому TradeCubit создаётся один раз.
+class _KeepAlive extends StatefulWidget {
+  final Widget child;
+  const _KeepAlive({required this.child});
+
+  @override
+  State<_KeepAlive> createState() => _KeepAliveState();
+}
+
+class _KeepAliveState extends State<_KeepAlive> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
