@@ -3,12 +3,11 @@ import 'dart:convert';
 
 import 'package:bittarget/features/trade/data/trade_models.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class TradeService {
-  final Dio _dio = Dio(
-  BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)),
-);
+  final Dio _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)));
 
   static const _rest = 'https://api.binance.com/api/v3';
   static const _ws = 'wss://stream.binance.com:9443/ws';
@@ -31,6 +30,17 @@ class TradeService {
       high: double.parse(d['highPrice']),
       low: double.parse(d['lowPrice']),
     );
+  }
+
+  // Стакан одним запросом: запасной путь, когда живой поток молчит
+  Future<OrderBook> fetchOrderBook(String symbol) async {
+    final response = await _dio.get('$_rest/depth', queryParameters: {'symbol': '${symbol}USDT', 'limit': 5});
+    final d = response.data;
+    return OrderBook(bids: _levels(d['bids']), asks: _levels(d['asks']));
+  }
+
+  List<OrderBookLevel> _levels(List raw) {
+    return raw.map<OrderBookLevel>((l) => OrderBookLevel(double.parse(l[0]), double.parse(l[1]))).toList();
   }
 
   // Живая цена (обновляется примерно раз в секунду)
@@ -57,11 +67,7 @@ class TradeService {
   // Живой стакан: 5 лучших уровней покупки и продажи раз в секунду
   Stream<OrderBook> depthStream(String symbol) {
     return _stream('$_ws/${symbol.toLowerCase()}usdt@depth5@1000ms', (d) {
-      List<OrderBookLevel> parse(List raw) {
-        return raw.map<OrderBookLevel>((l) => OrderBookLevel(double.parse(l[0]), double.parse(l[1]))).toList();
-      }
-
-      return OrderBook(bids: parse(d['bids']), asks: parse(d['asks']));
+      return OrderBook(bids: _levels(d['bids']), asks: _levels(d['asks']));
     });
   }
 
@@ -71,6 +77,7 @@ class TradeService {
     late final StreamController<T> controller;
     WebSocketChannel? channel;
     StreamSubscription? sub;
+    var warned = false;
 
     controller = StreamController<T>(
       onListen: () {
@@ -79,8 +86,12 @@ class TradeService {
           (raw) {
             try {
               controller.add(parse(jsonDecode(raw as String) as Map<String, dynamic>));
-            } catch (_) {
-              // Служебное сообщение другого формата: пропускаем
+            } catch (e) {
+              // Сообщение незнакомого формата пропускаем, но один раз сообщаем в консоль
+              if (!warned) {
+                warned = true;
+                debugPrint('WebSocket message skipped ($url): $e');
+              }
             }
           },
           onError: controller.addError,

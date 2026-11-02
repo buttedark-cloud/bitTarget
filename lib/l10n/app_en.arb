@@ -67,6 +67,14 @@
     "limitHint": "You set the price",
     "marketHint": "Instantly at the market price",
     "limitDesc": "You set the price yourself. In this demo it fills instantly if the price is within 5% of the market.",
-    "marketDesc": "Fills instantly at the current market price."
+    "marketDesc": "Fills instantly at the current market price.",
+    "logOut": "Log out",
+    "logIn": "Log in",
+    "online": "Online",
+    "offline": "Offline",
+    "loggedOutMessage": "You are signed out. Log in to get back to the app.",
+    "chartLoadError": "Could not load the chart. Showing the previous data.",
+    "reconnecting": "Reconnecting…",
+    "bookUnavailable": "Order book is unavailable"
     
 }

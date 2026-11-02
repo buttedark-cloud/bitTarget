@@ -213,4 +213,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get marketDesc => 'Fills instantly at the current market price.';
+
+  @override
+  String get logOut => 'Log out';
+
+  @override
+  String get logIn => 'Log in';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get loggedOutMessage =>
+      'You are signed out. Log in to get back to the app.';
+
+  @override
+  String get chartLoadError =>
+      'Could not load the chart. Showing the previous data.';
+
+  @override
+  String get reconnecting => 'Reconnecting…';
+
+  @override
+  String get bookUnavailable => 'Order book is unavailable';
 }

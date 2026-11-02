@@ -4,6 +4,7 @@ import 'package:bittarget/core/widgets/glass_card.dart';
 import 'package:bittarget/core/widgets/press_effect.dart';
 import 'package:bittarget/features/trade/presentation/cubit/trade_cubit.dart';
 import 'package:bittarget/features/trade/presentation/widgets/trade_chart.dart';
+import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,6 +18,7 @@ class TradeChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<TradeCubit>();
     final candles = state.candles;
     final isUp = candles.length < 2 || candles.last.close >= candles.first.close;
@@ -56,6 +58,28 @@ class TradeChartSection extends StatelessWidget {
             ),
           ],
         ),
+        // Не удалось подгрузить новый график: старый остаётся, но мы честно об этом говорим
+        if (state.chartError)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.neonRed.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.neonRed.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: AppColors.neonRed, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(l10n.chartLoadError, style: AppTypography.caption.copyWith(fontSize: 11, color: Colors.white70)),
+                  ),
+                ],
+              ),
+            ),
+          ),
         const SizedBox(height: 12),
         GlassCard(
           radius: 16,

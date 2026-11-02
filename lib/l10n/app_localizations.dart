@@ -505,6 +505,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fills instantly at the current market price.'**
   String get marketDesc;
+
+  /// No description provided for @logOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logOut;
+
+  /// No description provided for @logIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logIn;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @loggedOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed out. Log in to get back to the app.'**
+  String get loggedOutMessage;
+
+  /// No description provided for @chartLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the chart. Showing the previous data.'**
+  String get chartLoadError;
+
+  /// No description provided for @reconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get reconnecting;
+
+  /// No description provided for @bookUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Order book is unavailable'**
+  String get bookUnavailable;
 }
 
 class _AppLocalizationsDelegate

@@ -8,11 +8,21 @@ import 'package:flutter/material.dart';
 
 class OrderBookView extends StatelessWidget {
   final OrderBook? book;
+  final bool failed;
+  final VoidCallback onRetry;
   final double lastPrice;
   final bool isUp;
   final ValueChanged<double> onPriceTap;
 
-  const OrderBookView({super.key, required this.book, required this.lastPrice, required this.isUp, required this.onPriceTap});
+  const OrderBookView({
+    super.key,
+    required this.book,
+    required this.failed,
+    required this.onRetry,
+    required this.lastPrice,
+    required this.isUp,
+    required this.onPriceTap,
+  });
 
   static const int _rows = 5;
 
@@ -36,10 +46,20 @@ class OrderBookView extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         if (b == null)
-          const SizedBox(
+          SizedBox(
             height: 260,
             child: Center(
-              child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.neonGreen, strokeWidth: 2)),
+              child: failed
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline_rounded, color: AppColors.textSecondary, size: 28),
+                        const SizedBox(height: 8),
+                        Text(l10n.bookUnavailable, textAlign: TextAlign.center, style: AppTypography.caption),
+                        TextButton(onPressed: onRetry, child: Text(l10n.retry)),
+                      ],
+                    )
+                  : const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.neonGreen, strokeWidth: 2)),
             ),
           )
         else
@@ -121,6 +141,7 @@ class OrderBookView extends StatelessWidget {
   String _qty(double q) {
     if (q >= 1000) return q.toStringAsFixed(0);
     if (q >= 1) return q.toStringAsFixed(2);
-    return q.toStringAsFixed(3);
+    if (q >= 0.001) return q.toStringAsFixed(3);
+    return q.toStringAsFixed(5);
   }
 }

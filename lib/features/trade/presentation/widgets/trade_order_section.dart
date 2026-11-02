@@ -29,14 +29,16 @@ class _TradeOrderSectionState extends State<TradeOrderSection> {
         Expanded(
           flex: 5,
           child: RepaintBoundary(
-            // Стакан: только при новых заявках или новой цене
+            // Стакан: только при новых заявках, ошибке или новой цене
             child: BlocBuilder<TradeCubit, TradeState>(
-              buildWhen: (p, c) => p.orderBook != c.orderBook || p.ticker?.price != c.ticker?.price,
-              builder: (_, s) {
+              buildWhen: (p, c) => p.orderBook != c.orderBook || p.bookFailed != c.bookFailed || p.ticker?.price != c.ticker?.price,
+              builder: (context, s) {
                 final t = s.ticker;
                 if (t == null) return const SizedBox.shrink();
                 return OrderBookView(
                   book: s.orderBook,
+                  failed: s.bookFailed,
+                  onRetry: () => context.read<TradeCubit>().retryBook(),
                   lastPrice: t.price,
                   isUp: t.changePercent >= 0,
                   onPriceTap: (p) {

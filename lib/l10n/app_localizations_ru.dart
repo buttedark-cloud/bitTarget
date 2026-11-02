@@ -213,4 +213,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get marketDesc => 'Исполняется сразу по текущей рыночной цене.';
+
+  @override
+  String get logOut => 'Выйти из аккаунта';
+
+  @override
+  String get logIn => 'Войти в аккаунт';
+
+  @override
+  String get online => 'В сети';
+
+  @override
+  String get offline => 'Не в сети';
+
+  @override
+  String get loggedOutMessage =>
+      'Вы вышли из аккаунта. Войдите, чтобы вернуться в приложение.';
+
+  @override
+  String get chartLoadError =>
+      'Не удалось загрузить график. Показаны прежние данные.';
+
+  @override
+  String get reconnecting => 'Переподключение…';
+
+  @override
+  String get bookUnavailable => 'Стакан недоступен';
 }

@@ -7,6 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum TradeStatus { loading, ready, error }
 
+// Состояние живого соединения (WebSocket)
+enum LiveStatus { connecting, live, reconnecting }
+
 class TradeState {
   final TradeStatus status;
   final String symbol;
@@ -17,7 +20,10 @@ class TradeState {
   final Set<String> favorites;
   final bool showMa;
   final bool showDots;
-  final String? error; // текст последней ошибки загрузки
+  final String? error; // текст ошибки, когда данных нет совсем
+  final LiveStatus live;
+  final bool chartError; // график не обновился, но старые данные ещё на экране
+  final bool bookFailed; // стакан недоступен
 
   const TradeState({
     this.status = TradeStatus.loading,
@@ -30,6 +36,9 @@ class TradeState {
     this.showMa = false,
     this.showDots = true,
     this.error,
+    this.live = LiveStatus.connecting,
+    this.chartError = false,
+    this.bookFailed = false,
   });
 
   TradeState copyWith({
@@ -44,6 +53,9 @@ class TradeState {
     bool? showDots,
     String? error,
     bool clearError = false,
+    LiveStatus? live,
+    bool? chartError,
+    bool? bookFailed,
   }) {
     return TradeState(
       status: status ?? this.status,
@@ -56,6 +68,9 @@ class TradeState {
       showMa: showMa ?? this.showMa,
       showDots: showDots ?? this.showDots,
       error: clearError ? null : (error ?? this.error),
+      live: live ?? this.live,
+      chartError: chartError ?? this.chartError,
+      bookFailed: bookFailed ?? this.bookFailed,
     );
   }
 }
@@ -70,10 +85,16 @@ class TradeCubit extends Cubit<TradeState> {
   StreamSubscription<Candle>? _klineSub;
   StreamSubscription<OrderBook>? _depthSub;
   Timer? _reconnectTimer;
+  Timer? _bookTimer;
 
   // Видна ли вкладка торговли. Пока не видна, сокеты закрыты
   bool _active;
 
+  // Когда последний раз стакан пришёл по сокету, и для какой монеты сейчас идёт запасной запрос
+  DateTime _lastBookAt = DateTime.fromMillisecondsSinceEpoch(0);
+  String? _bookFetchingSym;
+
+  // ignore: prefer_initializing_formals
   TradeCubit(this._service, {String symbol = 'BTC', bool active = true}) : _active = active, super(TradeState(symbol: symbol));
 
   String get symbol => state.symbol;
@@ -81,9 +102,13 @@ class TradeCubit extends Cubit<TradeState> {
 
   Future<void> load({String? interval}) async {
     final sym = state.symbol;
-    final tf = interval ?? state.interval;
+    final prevInterval = state.interval;
+    final tf = interval ?? prevInterval;
+    // Если данные уже есть на экране, при сбое покажем их дальше
+    final hadData = state.ticker != null && state.candles.isNotEmpty;
+
     _stopStreams();
-    emit(state.copyWith(status: TradeStatus.loading, interval: tf, clearError: true));
+    emit(state.copyWith(status: TradeStatus.loading, interval: tf, clearError: true, chartError: false));
 
     var step = 'candles';
     try {
@@ -99,7 +124,13 @@ class TradeCubit extends Cubit<TradeState> {
       if (_active) _startStreams();
     } catch (e, st) {
       debugPrint('TradeCubit.load failed at $step: $e\n$st');
-      if (!isClosed && state.symbol == sym && state.interval == tf) {
+      if (isClosed || state.symbol != sym || state.interval != tf) return;
+
+      if (hadData) {
+        // Возвращаем прежний таймфрейм: старые свечи принадлежат ему
+        emit(state.copyWith(status: TradeStatus.ready, interval: prevInterval, chartError: true));
+        if (_active) _startStreams();
+      } else {
         var text = '$step: $e';
         if (text.length > 300) text = text.substring(0, 300);
         emit(state.copyWith(status: TradeStatus.error, error: text));
@@ -143,42 +174,88 @@ class TradeCubit extends Cubit<TradeState> {
 
   void toggleDots() => emit(state.copyWith(showDots: !state.showDots));
 
-  void _startStreams() {
+  // Кнопка «Повторить» под стаканом
+  void retryBook() {
+    emit(state.copyWith(bookFailed: false));
+    _fetchBookSnapshot();
+  }
+
+  void _startStreams({bool reconnect = false}) {
     _stopStreams();
+    // При переподключении остаёмся в состоянии «переподключение» до первого сообщения
+    if (!reconnect) emit(state.copyWith(live: LiveStatus.connecting));
+
     _tickerSub = _service
         .tickerStream(state.symbol)
         .listen(
-          (t) => emit(state.copyWith(ticker: t)),
-          onError: (_) => _scheduleReconnect(),
-          onDone: _scheduleReconnect,
+          (t) => emit(state.copyWith(ticker: t, live: LiveStatus.live)),
+          onError: (_) => _onStreamLost(),
+          onDone: _onStreamLost,
         );
-    _klineSub = _service
-        .klineStream(state.symbol, state.interval)
-        .listen(_onKline, onError: (_) => _scheduleReconnect(), onDone: _scheduleReconnect);
+    _klineSub = _service.klineStream(state.symbol, state.interval).listen(_onKline, onError: (_) => _onStreamLost(), onDone: _onStreamLost);
     _depthSub = _service
         .depthStream(state.symbol)
         .listen(
-          (b) => emit(state.copyWith(orderBook: b)),
-          onError: (_) => _scheduleReconnect(),
-          onDone: _scheduleReconnect,
+          (b) {
+            _lastBookAt = DateTime.now();
+            emit(state.copyWith(orderBook: b, bookFailed: false, live: LiveStatus.live));
+          },
+          onError: (_) => _onStreamLost(),
+          onDone: _onStreamLost,
         );
+
+    // Стакан показываем сразу обычным запросом, не дожидаясь сокета
+    _lastBookAt = DateTime.fromMillisecondsSinceEpoch(0);
+    _fetchBookSnapshot();
+
+    // Если сокет со стаканом молчит больше 4 секунд, обновляем стакан обычными запросами
+    _bookTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (isClosed || !_active) return;
+      if (DateTime.now().difference(_lastBookAt) > const Duration(seconds: 4)) _fetchBookSnapshot();
+    });
   }
 
   void _stopStreams() {
     _reconnectTimer?.cancel();
+    _bookTimer?.cancel();
     _tickerSub?.cancel();
     _klineSub?.cancel();
     _depthSub?.cancel();
     _tickerSub = null;
     _klineSub = null;
     _depthSub = null;
+    _bookTimer = null;
   }
 
-  // Связь оборвалась: через 3 секунды пробуем подключиться снова (только если вкладка активна)
+  Future<void> _fetchBookSnapshot() async {
+    final sym = state.symbol;
+    if (_bookFetchingSym == sym) return; // такой запрос уже идёт
+    _bookFetchingSym = sym;
+
+    try {
+      final book = await _service.fetchOrderBook(sym).timeout(_requestTimeout);
+      if (isClosed || state.symbol != sym) return;
+      emit(state.copyWith(orderBook: book, bookFailed: false));
+    } catch (e) {
+      debugPrint('Order book request failed: $e');
+      if (!isClosed && state.symbol == sym && state.orderBook == null) emit(state.copyWith(bookFailed: true));
+    } finally {
+      if (_bookFetchingSym == sym) _bookFetchingSym = null;
+    }
+  }
+
+  // Связь оборвалась: сообщаем об этом экрану и пробуем подключиться снова
+  void _onStreamLost() {
+    if (isClosed) return;
+    if (state.live != LiveStatus.reconnecting) emit(state.copyWith(live: LiveStatus.reconnecting));
+    _scheduleReconnect();
+  }
+
+  // Подключаемся снова через 3 секунды (только если вкладка активна)
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 3), () {
-      if (!isClosed && _active) _startStreams();
+      if (!isClosed && _active) _startStreams(reconnect: true);
     });
   }
 
@@ -193,7 +270,7 @@ class TradeCubit extends Cubit<TradeState> {
       list.add(c);
       if (list.length > candleLimit) list.removeAt(0);
     }
-    emit(state.copyWith(candles: list));
+    emit(state.copyWith(candles: list, live: LiveStatus.live));
   }
 
   @override

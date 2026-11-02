@@ -5,6 +5,8 @@ import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:bittarget/main_shell_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bittarget/core/auth/auth_cubit.dart';
+import 'package:bittarget/core/nav/nav_cubit.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/wallet/cubit/wallet_cubit.dart';
@@ -23,6 +25,8 @@ class CryptoTrackerApp extends StatelessWidget {
         BlocProvider(create: (_) => WalletCubit()),
         BlocProvider(create: (_) => MarketCubit(CryptoApiService())..loadMarket()),
         BlocProvider(create: (_) => LocaleCubit()),
+        BlocProvider(create: (_) => NavCubit()),
+        BlocProvider(create: (_) => AuthCubit()),
       ],
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) => MaterialApp(

@@ -6,6 +6,8 @@ import 'package:bittarget/core/widgets/glass_card.dart';
 import 'package:bittarget/features/wallet/presentation/widgets/wallet_action_sheet.dart';
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:bittarget/core/nav/nav_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WalletSummaryCard extends StatelessWidget {
   final double totalUsd;
@@ -58,7 +60,7 @@ class WalletSummaryCard extends StatelessWidget {
                 label: l10n.withdraw,
                 onTap: () => showWalletActionSheet(context, WalletAction.withdraw),
               ),
-              ActionSquareButton(icon: Icons.swap_horiz, label: l10n.trade), // переключение на вкладку сделаем позже
+              ActionSquareButton(icon: Icons.swap_horiz, label: l10n.trade, onTap: () => context.read<NavCubit>().goTo(1)),
               ActionSquareButton(
                 icon: Icons.send_rounded,
                 label: l10n.transfer,
