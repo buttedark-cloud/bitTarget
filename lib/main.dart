@@ -9,20 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'features/wallet/cubit/wallet_cubit.dart';
 
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
-
 void main() {
-  // Временно: печатаем все ошибки одной понятной строкой
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-    debugPrint('FLUTTER ERROR: ${details.exceptionAsString()}\n${details.stack}');
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('ASYNC ERROR: $error\n$stack');
-    return false;
-  };
   runApp(const CryptoTrackerApp());
 }
 

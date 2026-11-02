@@ -84,22 +84,16 @@ class TradeCubit extends Cubit<TradeState> {
     final tf = interval ?? state.interval;
     _stopStreams();
     emit(state.copyWith(status: TradeStatus.loading, interval: tf, clearError: true));
-    debugPrint('TradeCubit.load start: $sym $tf');
 
     var step = 'candles';
     try {
       // Шаги идут по очереди, чтобы в ошибке было видно, на каком именно всё сломалось
       final candles = await _service.fetchCandles(sym, tf, limit: candleLimit).timeout(_requestTimeout);
-      debugPrint('TradeCubit.load candles ok: ${candles.length}');
       step = 'ticker';
       final ticker = await _service.fetchTicker(sym).timeout(_requestTimeout);
-      debugPrint('TradeCubit.load ticker ok: ${ticker.price}');
 
       // Если за это время закрыли экран или выбрали другую монету или таймфрейм, ответ устарел
-      if (isClosed || state.symbol != sym || state.interval != tf) {
-        debugPrint('TradeCubit.load result dropped (stale)');
-        return;
-      }
+      if (isClosed || state.symbol != sym || state.interval != tf) return;
 
       emit(state.copyWith(status: TradeStatus.ready, candles: candles, ticker: ticker, clearError: true));
       if (_active) _startStreams();

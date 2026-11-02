@@ -64,10 +64,10 @@ class _TradeBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocBuilder<TradeCubit, TradeState>(
-      buildWhen: (p, c) => p.showMa != c.showMa || p.showDots != c.showDots,
       builder: (context, state) {
-        debugPrint('TradeBody mode=${_modeOf(state)}');
-        switch (_modeOf(state)) {
+        final mode = _modeOf(state);
+
+        switch (mode) {
           case _Mode.error:
             return Center(
               child: Padding(
@@ -85,16 +85,7 @@ class _TradeBody extends StatelessWidget {
               ),
             );
           case _Mode.loading:
-            return const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: AppColors.neonGreen),
-                  SizedBox(height: 12),
-                  Text('v3', style: TextStyle(color: Colors.white54, fontSize: 10)),
-                ],
-              ),
-            );
+            return const Center(child: CircularProgressIndicator(color: AppColors.neonGreen));
           case _Mode.content:
             return const _TradeContent();
         }
