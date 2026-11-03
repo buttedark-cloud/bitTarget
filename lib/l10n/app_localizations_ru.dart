@@ -239,4 +239,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get bookUnavailable => 'Стакан недоступен';
+
+  @override
+  String get errNetwork => 'Нет подключения к интернету';
+
+  @override
+  String get errTimeout => 'Сервер слишком долго не отвечает';
+
+  @override
+  String get errServer => 'Ошибка сервера. Попробуйте позже';
+
+  @override
+  String get errRateLimited => 'Слишком много запросов. Подождите немного';
+
+  @override
+  String get errUnknown => 'Что-то пошло не так';
+
+  @override
+  String get offlineBanner => 'Нет соединения. Показаны последние цены.';
 }

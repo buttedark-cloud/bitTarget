@@ -1,28 +1,29 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:bittarget/core/network/api_client.dart';
 import 'package:bittarget/features/trade/data/trade_models.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class TradeService {
-  final Dio _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)));
+  final ApiClient _api = ApiClient.shared;
 
   static const _rest = 'https://api.binance.com/api/v3';
   static const _ws = 'wss://stream.binance.com:9443/ws';
 
   // История для графика: цены закрытия свечей
   Future<List<Candle>> fetchCandles(String symbol, String interval, {int limit = 48}) async {
-    final response = await _dio.get('$_rest/klines', queryParameters: {'symbol': '${symbol}USDT', 'interval': interval, 'limit': limit});
-    final List data = response.data;
+    final List data = await _api.get<List<dynamic>>(
+      '$_rest/klines',
+      queryParameters: {'symbol': '${symbol}USDT', 'interval': interval, 'limit': limit},
+    );
     return data.map<Candle>((c) => Candle(DateTime.fromMillisecondsSinceEpoch(c[0] as int), double.parse(c[4]))).toList();
   }
 
   // Цена, изменение, максимум и минимум за 24 часа
   Future<TickerData> fetchTicker(String symbol) async {
-    final response = await _dio.get('$_rest/ticker/24hr', queryParameters: {'symbol': '${symbol}USDT'});
-    final d = response.data;
+    final d = await _api.get<Map<String, dynamic>>('$_rest/ticker/24hr', queryParameters: {'symbol': '${symbol}USDT'});
     return TickerData(
       price: double.parse(d['lastPrice']),
       change: double.parse(d['priceChange']),
@@ -34,8 +35,7 @@ class TradeService {
 
   // Стакан одним запросом: запасной путь, когда живой поток молчит
   Future<OrderBook> fetchOrderBook(String symbol) async {
-    final response = await _dio.get('$_rest/depth', queryParameters: {'symbol': '${symbol}USDT', 'limit': 5});
-    final d = response.data;
+    final d = await _api.get<Map<String, dynamic>>('$_rest/depth', queryParameters: {'symbol': '${symbol}USDT', 'limit': 5});
     return OrderBook(bids: _levels(d['bids']), asks: _levels(d['asks']));
   }
 

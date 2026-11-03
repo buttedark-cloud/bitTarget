@@ -1,4 +1,5 @@
 import 'package:bittarget/core/constants/app_colors.dart';
+import 'package:bittarget/core/network/api_error_text.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/core/widgets/base_screen_layout.dart';
 import 'package:bittarget/features/home/presentation/cubit/market_cubit.dart';
@@ -27,67 +28,84 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Шапка профиля и языка
+            // Шапка: слева профиль (сжимается при нехватке места), справа колокольчик и язык
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(22),
-                    onTap: onProfileTap,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                      child: Row(
-                        children: [
-                          Stack(
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(22),
+                        onTap: onProfileTap,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.neonGreen, width: 1.5),
-                                  color: AppColors.cardBackground,
-                                ),
-                                child: const Icon(Icons.person, color: Colors.white70, size: 24),
-                              ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.neonGreen,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.black, width: 2),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(l10n.welcomeBack, style: AppTypography.caption),
-                              const SizedBox(height: 2),
-                              Row(
+                              Stack(
                                 children: [
-                                  Text('Alex Trader', style: AppTypography.bodyLarge.copyWith(fontSize: 15)),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.verified_rounded, color: AppColors.neonGreen, size: 15),
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: AppColors.neonGreen, width: 1.5),
+                                      color: AppColors.cardBackground,
+                                    ),
+                                    child: const Icon(Icons.person, color: Colors.white70, size: 24),
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    bottom: 0,
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.neonGreen,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.black, width: 2),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(l10n.welcomeBack, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.caption),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            'Alex Trader',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: AppTypography.bodyLarge.copyWith(fontSize: 15),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(Icons.verified_rounded, color: AppColors.neonGreen, size: 15),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       width: 38,
@@ -116,6 +134,7 @@ class HomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(19),
                         onTap: onLanguageToggle,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.language, color: AppColors.neonGreen, size: 16),
                             const SizedBox(width: 4),
@@ -170,13 +189,19 @@ class HomeScreen extends StatelessWidget {
 
                 if (state is MarketError) {
                   return Center(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 40),
-                        Text(l10n.marketLoadError, style: AppTypography.bodyLarge),
-                        const SizedBox(height: 12),
-                        TextButton(onPressed: () => context.read<MarketCubit>().loadMarket(), child: Text(l10n.retry)),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 36),
+                          const SizedBox(height: 12),
+                          Text(l10n.marketLoadError, style: AppTypography.bodyLarge),
+                          const SizedBox(height: 6),
+                          Text(apiErrorText(l10n, state.kind), textAlign: TextAlign.center, style: AppTypography.caption),
+                          const SizedBox(height: 12),
+                          TextButton(onPressed: () => context.read<MarketCubit>().loadMarket(), child: Text(l10n.retry)),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -185,11 +210,42 @@ class HomeScreen extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // Связь пропала: показываем последние известные цены и говорим об этом
+                      if (state.offline)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFB800).withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFFFFB800).withValues(alpha: 0.4)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.wifi_off_rounded, color: Color(0xFFFFB800), size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    l10n.offlineBanner,
+                                    style: AppTypography.caption.copyWith(fontSize: 11, color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      // Wrap: «Обновления» уходят на вторую строку, если заголовок длинный
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Text(l10n.massiveGrowth, style: AppTypography.titleLarge),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
                                 width: 8,
@@ -203,15 +259,12 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-
                       MarketHeroCard(
                         asset: state.selectedAsset,
                         allAssets: state.assets,
                         onAssetSelected: (selected) => context.read<MarketCubit>().selectAsset(selected),
                       ),
-
                       const SizedBox(height: 24),
-
                       MarketOverviewSection(
                         assets: state.assets,
                         onAssetTap: (selected) => context.read<MarketCubit>().selectAsset(selected),

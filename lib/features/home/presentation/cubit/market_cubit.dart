@@ -1,33 +1,43 @@
 import 'dart:async';
 
+import 'package:bittarget/core/network/api_client.dart';
 import 'package:bittarget/features/home/data/crypto_api_service.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class MarketState {}
 
 class MarketLoading extends MarketState {}
 
-class MarketError extends MarketState {}
+class MarketError extends MarketState {
+  final ApiErrorKind kind;
+
+  MarketError(this.kind);
+}
 
 class MarketLoaded extends MarketState {
   final List<CryptoAsset> assets;
   final CryptoAsset selectedAsset;
+  final bool offline; // связь потеряна, на экране последние известные цены
 
-  MarketLoaded({required this.assets, required this.selectedAsset});
+  MarketLoaded({required this.assets, required this.selectedAsset, this.offline = false});
 }
 
 class MarketCubit extends Cubit<MarketState> {
   final CryptoApiService _api;
   Timer? _timer;
+  bool _polling = false;
   Map<String, List<double>> _charts = {};
 
   MarketCubit(this._api) : super(MarketLoading());
 
   Future<void> loadMarket() async {
+    _timer?.cancel();
     emit(MarketLoading());
     try {
       final assets = await _api.fetchMarketData();
+      if (assets.isEmpty) throw const ApiException(ApiErrorKind.unknown, 'empty market');
       await _loadCharts(assets);
       if (isClosed) return;
 
@@ -35,8 +45,9 @@ class MarketCubit extends Cubit<MarketState> {
       final btc = withCharts.firstWhere((a) => a.symbol == 'BTC', orElse: () => withCharts.first);
       emit(MarketLoaded(assets: withCharts, selectedAsset: btc));
       _startPolling();
-    } catch (_) {
-      if (!isClosed) emit(MarketError());
+    } catch (e) {
+      debugPrint('MarketCubit.loadMarket failed: $e');
+      if (!isClosed) emit(MarketError(e is ApiException ? e.kind : ApiErrorKind.unknown));
     }
   }
 
@@ -66,15 +77,23 @@ class MarketCubit extends Cubit<MarketState> {
   void _startPolling() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (_polling) return; // предыдущий запрос ещё не закончился
+      _polling = true;
       try {
         final updated = _applyCharts(await _api.fetchMarketData());
-        if (isClosed || state is! MarketLoaded) return;
+        final current = state;
+        if (isClosed || current is! MarketLoaded || updated.isEmpty) return;
 
-        final selected = (state as MarketLoaded).selectedAsset;
-        final fresh = updated.firstWhere((a) => a.symbol == selected.symbol, orElse: () => updated.first);
+        final fresh = updated.firstWhere((a) => a.symbol == current.selectedAsset.symbol, orElse: () => updated.first);
         emit(MarketLoaded(assets: updated, selectedAsset: fresh));
       } catch (_) {
-        // Сбой одного обновления не страшен: остаются прошлые цены
+        // Связь пропала: оставляем последние цены и показываем полоску об этом
+        final current = state;
+        if (!isClosed && current is MarketLoaded && !current.offline) {
+          emit(MarketLoaded(assets: current.assets, selectedAsset: current.selectedAsset, offline: true));
+        }
+      } finally {
+        _polling = false;
       }
     });
   }
@@ -82,7 +101,7 @@ class MarketCubit extends Cubit<MarketState> {
   void selectAsset(CryptoAsset asset) {
     final current = state;
     if (current is! MarketLoaded) return;
-    emit(MarketLoaded(assets: current.assets, selectedAsset: asset));
+    emit(MarketLoaded(assets: current.assets, selectedAsset: asset, offline: current.offline));
   }
 
   @override

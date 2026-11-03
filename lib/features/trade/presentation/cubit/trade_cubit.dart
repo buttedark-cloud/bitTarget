@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bittarget/core/network/api_client.dart';
 import 'package:bittarget/features/trade/data/trade_models.dart';
 import 'package:bittarget/features/trade/data/trade_service.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +21,7 @@ class TradeState {
   final Set<String> favorites;
   final bool showMa;
   final bool showDots;
-  final String? error; // текст ошибки, когда данных нет совсем
+  final ApiErrorKind? errorKind; // причина, когда данных нет совсем
   final LiveStatus live;
   final bool chartError; // график не обновился, но старые данные ещё на экране
   final bool bookFailed; // стакан недоступен
@@ -35,7 +36,7 @@ class TradeState {
     this.favorites = const {},
     this.showMa = false,
     this.showDots = true,
-    this.error,
+    this.errorKind,
     this.live = LiveStatus.connecting,
     this.chartError = false,
     this.bookFailed = false,
@@ -51,7 +52,7 @@ class TradeState {
     Set<String>? favorites,
     bool? showMa,
     bool? showDots,
-    String? error,
+    ApiErrorKind? errorKind,
     bool clearError = false,
     LiveStatus? live,
     bool? chartError,
@@ -67,7 +68,7 @@ class TradeState {
       favorites: favorites ?? this.favorites,
       showMa: showMa ?? this.showMa,
       showDots: showDots ?? this.showDots,
-      error: clearError ? null : (error ?? this.error),
+      errorKind: clearError ? null : (errorKind ?? this.errorKind),
       live: live ?? this.live,
       chartError: chartError ?? this.chartError,
       bookFailed: bookFailed ?? this.bookFailed,
@@ -77,7 +78,6 @@ class TradeState {
 
 class TradeCubit extends Cubit<TradeState> {
   static const int candleLimit = 48;
-  static const Duration _requestTimeout = Duration(seconds: 15);
 
   final TradeService _service;
 
@@ -112,10 +112,10 @@ class TradeCubit extends Cubit<TradeState> {
 
     var step = 'candles';
     try {
-      // Шаги идут по очереди, чтобы в ошибке было видно, на каком именно всё сломалось
-      final candles = await _service.fetchCandles(sym, tf, limit: candleLimit).timeout(_requestTimeout);
+      // Шаги идут по очереди, чтобы в консоли было видно, на каком именно всё сломалось
+      final candles = await _service.fetchCandles(sym, tf, limit: candleLimit);
       step = 'ticker';
-      final ticker = await _service.fetchTicker(sym).timeout(_requestTimeout);
+      final ticker = await _service.fetchTicker(sym);
 
       // Если за это время закрыли экран или выбрали другую монету или таймфрейм, ответ устарел
       if (isClosed || state.symbol != sym || state.interval != tf) return;
@@ -131,9 +131,7 @@ class TradeCubit extends Cubit<TradeState> {
         emit(state.copyWith(status: TradeStatus.ready, interval: prevInterval, chartError: true));
         if (_active) _startStreams();
       } else {
-        var text = '$step: $e';
-        if (text.length > 300) text = text.substring(0, 300);
-        emit(state.copyWith(status: TradeStatus.error, error: text));
+        emit(state.copyWith(status: TradeStatus.error, errorKind: e is ApiException ? e.kind : ApiErrorKind.unknown));
       }
     }
   }
@@ -233,7 +231,7 @@ class TradeCubit extends Cubit<TradeState> {
     _bookFetchingSym = sym;
 
     try {
-      final book = await _service.fetchOrderBook(sym).timeout(_requestTimeout);
+      final book = await _service.fetchOrderBook(sym);
       if (isClosed || state.symbol != sym) return;
       emit(state.copyWith(orderBook: book, bookFailed: false));
     } catch (e) {

@@ -1,17 +1,17 @@
 import 'dart:convert';
 
+import 'package:bittarget/core/network/api_client.dart';
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class CryptoApiService {
-  final Dio _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)));
+  final ApiClient _api = ApiClient.shared;
 
   static const List<String> targetSymbols = [
     'BTCUSDT',
     'ETHUSDT',
     'SOLUSDT',
-    'TONUSDT', // см. инструкцию: заменить на 'GRAMUSDT', если пара живая
+    'TONUSDT', // если пара GRAMUSDT живая, замени на 'GRAMUSDT'
     'ADAUSDT',
     'XRPUSDT',
     'DOTUSDT',
@@ -49,9 +49,10 @@ class CryptoApiService {
 
   // Цены, изменение и максимум за 24 часа: все монеты одним запросом
   Future<List<CryptoAsset>> fetchMarketData() async {
-    final response = await _dio.get('https://api.binance.com/api/v3/ticker/24hr', queryParameters: {'symbols': jsonEncode(targetSymbols)});
-
-    final List data = response.data;
+    final List data = await _api.get<List<dynamic>>(
+      'https://api.binance.com/api/v3/ticker/24hr',
+      queryParameters: {'symbols': jsonEncode(targetSymbols)},
+    );
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
     final fresh = data.where((item) {
@@ -86,12 +87,11 @@ class CryptoApiService {
 
   // Настоящий график: цены закрытия 24 часовых свечей
   Future<List<double>> fetchSparkline(String symbol) async {
-    final response = await _dio.get(
+    final List data = await _api.get<List<dynamic>>(
       'https://api.binance.com/api/v3/klines',
       queryParameters: {'symbol': '${symbol}USDT', 'interval': '1h', 'limit': 24},
     );
 
-    final List data = response.data;
     return data.map<double>((candle) => double.parse(candle[4])).toList();
   }
 }

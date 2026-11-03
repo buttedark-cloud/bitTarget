@@ -23,8 +23,11 @@ class MarketOverviewSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Text(l10n.marketOverview.toUpperCase(), style: AppTypography.titleLarge),
             Text(l10n.vol24h, style: AppTypography.caption),
@@ -46,51 +49,59 @@ class MarketOverviewSection extends StatelessWidget {
                 child: GlassCard(
                   radius: 16,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Row(
-                    children: [
-                      CoinIcon(symbol: asset.symbol, size: 36),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isEn ? asset.nameEn : asset.nameRu,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.bodyLarge,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(asset.pair, style: AppTypography.caption),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: NeonChart(
-                            points: asset.sparkline,
-                            isPositive: asset.isPositive,
-                            height: 30,
-                            strokeWidth: 1.8,
-                            showFill: false,
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // На узком экране мини-график скрываем, чтобы название монеты не обрезалось
+                      final showChart = constraints.maxWidth > 250;
+
+                      return Row(
                         children: [
-                          Text(formatUsd(asset.price), style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${asset.isPositive ? '+' : '-'}${asset.changePercent.toStringAsFixed(2)}%',
-                            style: AppTypography.caption.copyWith(color: color, fontWeight: FontWeight.w700),
+                          CoinIcon(symbol: asset.symbol, size: 36),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isEn ? asset.nameEn : asset.nameRu,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.bodyLarge,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(asset.pair, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.caption),
+                              ],
+                            ),
+                          ),
+                          if (showChart)
+                            Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: NeonChart(
+                                  points: asset.sparkline,
+                                  isPositive: asset.isPositive,
+                                  height: 30,
+                                  strokeWidth: 1.8,
+                                  showFill: false,
+                                ),
+                              ),
+                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(formatUsd(asset.price), style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${asset.isPositive ? '+' : '-'}${asset.changePercent.toStringAsFixed(2)}%',
+                                style: AppTypography.caption.copyWith(color: color, fontWeight: FontWeight.w700),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),

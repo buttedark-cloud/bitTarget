@@ -50,6 +50,7 @@ class MarketHeroCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       isEn ? asset.nameEn : asset.nameRu,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: AppTypography.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
                                     ),
@@ -76,20 +77,27 @@ class MarketHeroCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(8)),
-                    child: Text(
-                      '${asset.isPositive ? '+' : '-'}${asset.changePercent.toStringAsFixed(2)}%',
-                      style: AppTypography.badgeGreen.copyWith(color: Colors.black, fontWeight: FontWeight.w800),
-                    ),
+              // Правая колонка уменьшается, если не хватает места
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(8)),
+                        child: Text(
+                          '${asset.isPositive ? '+' : '-'}${asset.changePercent.toStringAsFixed(2)}%',
+                          style: AppTypography.badgeGreen.copyWith(color: Colors.black, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text('${l10n.high24h}: ${formatUsd(asset.high24h)}', style: AppTypography.caption),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text('${l10n.high24h}: ${formatUsd(asset.high24h)}', style: AppTypography.caption),
-                ],
+                ),
               ),
             ],
           ),

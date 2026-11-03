@@ -553,6 +553,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order book is unavailable'**
   String get bookUnavailable;
+
+  /// No description provided for @errNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get errNetwork;
+
+  /// No description provided for @errTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The server took too long to respond'**
+  String get errTimeout;
+
+  /// No description provided for @errServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Try again later'**
+  String get errServer;
+
+  /// No description provided for @errRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Wait a moment'**
+  String get errRateLimited;
+
+  /// No description provided for @errUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get errUnknown;
+
+  /// No description provided for @offlineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Showing the latest prices.'**
+  String get offlineBanner;
 }
 
 class _AppLocalizationsDelegate

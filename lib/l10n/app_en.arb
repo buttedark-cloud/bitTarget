@@ -75,6 +75,12 @@
     "loggedOutMessage": "You are signed out. Log in to get back to the app.",
     "chartLoadError": "Could not load the chart. Showing the previous data.",
     "reconnecting": "Reconnecting…",
-    "bookUnavailable": "Order book is unavailable"
+    "bookUnavailable": "Order book is unavailable",
+    "errNetwork": "No internet connection",
+    "errTimeout": "The server took too long to respond",
+    "errServer": "Server error. Try again later",
+    "errRateLimited": "Too many requests. Wait a moment",
+    "errUnknown": "Something went wrong",
+    "offlineBanner": "No connection. Showing the latest prices."
     
 }

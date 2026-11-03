@@ -149,25 +149,29 @@ class _MainShellScreenState extends State<MainShellScreen> {
     // Пока пользователь вышел, доступен только профиль: остальное тускнеет и не нажимается
     final locked = !loggedIn && index != _profileIndex;
 
-    return Opacity(
-      opacity: locked ? 0.3 : 1,
-      child: IgnorePointer(
-        ignoring: locked,
-        child: PressEffect(
-          scale: 0.9,
-          onTap: () => context.read<NavCubit>().goTo(index),
-          child: SizedBox(
-            width: 65,
+    // Expanded: каждый пункт получает равную долю ширины вместо жёстких 65 пикселей
+    return Expanded(
+      child: Opacity(
+        opacity: locked ? 0.3 : 1,
+        child: IgnorePointer(
+          ignoring: locked,
+          child: PressEffect(
+            scale: 0.9,
+            onTap: () => context.read<NavCubit>().goTo(index),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, color: isActive ? AppColors.neonGreen : AppColors.textSecondary, size: 24),
                 const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: AppTypography.caption.copyWith(
-                    color: isActive ? AppColors.neonGreen : AppColors.textSecondary,
-                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: AppTypography.caption.copyWith(
+                      color: isActive ? AppColors.neonGreen : AppColors.textSecondary,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                    ),
                   ),
                 ),
               ],

@@ -239,4 +239,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookUnavailable => 'Order book is unavailable';
+
+  @override
+  String get errNetwork => 'No internet connection';
+
+  @override
+  String get errTimeout => 'The server took too long to respond';
+
+  @override
+  String get errServer => 'Server error. Try again later';
+
+  @override
+  String get errRateLimited => 'Too many requests. Wait a moment';
+
+  @override
+  String get errUnknown => 'Something went wrong';
+
+  @override
+  String get offlineBanner => 'No connection. Showing the latest prices.';
 }

@@ -11,6 +11,8 @@ import 'package:bittarget/features/trade/presentation/widgets/trade_sheets.dart'
 import 'package:bittarget/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bittarget/core/network/api_client.dart';
+import 'package:bittarget/core/network/api_error_text.dart';
 
 class TradeScreen extends StatefulWidget {
   // true, когда открыта именно вкладка «Торговля»
@@ -78,7 +80,11 @@ class _TradeBody extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(l10n.marketLoadError, style: AppTypography.bodyLarge),
                     const SizedBox(height: 8),
-                    SelectableText(state.error ?? '', textAlign: TextAlign.center, style: AppTypography.caption.copyWith(fontSize: 11)),
+                    Text(
+                      apiErrorText(l10n, state.errorKind ?? ApiErrorKind.unknown),
+                      textAlign: TextAlign.center,
+                      style: AppTypography.caption.copyWith(fontSize: 11),
+                    ),
                     const SizedBox(height: 12),
                     TextButton(onPressed: () => context.read<TradeCubit>().load(), child: Text(l10n.retry)),
                   ],

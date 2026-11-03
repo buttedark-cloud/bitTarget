@@ -1,4 +1,5 @@
 import 'package:bittarget/core/constants/app_colors.dart';
+import 'package:bittarget/core/network/api_error_text.dart';
 import 'package:bittarget/core/theme/app_typography.dart';
 import 'package:bittarget/core/utils/format.dart';
 import 'package:bittarget/core/widgets/action_square_button.dart';
@@ -36,7 +37,11 @@ class WalletScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 36),
+            const SizedBox(height: 12),
             Text(l10n.marketLoadError, style: AppTypography.bodyLarge),
+            const SizedBox(height: 6),
+            Text(apiErrorText(l10n, market.kind), textAlign: TextAlign.center, style: AppTypography.caption),
             const SizedBox(height: 12),
             TextButton(onPressed: () => context.read<MarketCubit>().loadMarket(), child: Text(l10n.retry)),
           ],
@@ -81,7 +86,10 @@ class WalletScreen extends StatelessWidget {
                   style: AppTypography.caption.copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
-                Text(formatUsd(snap.netWorth), style: AppTypography.displayLarge.copyWith(fontSize: 36)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(formatUsd(snap.netWorth), style: AppTypography.displayLarge.copyWith(fontSize: 36)),
+                ),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -98,27 +106,34 @@ class WalletScreen extends StatelessWidget {
                 Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    ActionSquareButton(
-                      icon: Icons.arrow_downward,
-                      label: l10n.deposit,
-                      onTap: () => showWalletActionSheet(context, WalletAction.deposit),
+                    Expanded(
+                      child: ActionSquareButton(
+                        icon: Icons.arrow_downward,
+                        label: l10n.deposit,
+                        onTap: () => showWalletActionSheet(context, WalletAction.deposit),
+                      ),
                     ),
-                    ActionSquareButton(
-                      icon: Icons.arrow_upward,
-                      label: l10n.withdraw,
-                      onTap: () => showWalletActionSheet(context, WalletAction.withdraw),
+                    Expanded(
+                      child: ActionSquareButton(
+                        icon: Icons.arrow_upward,
+                        label: l10n.withdraw,
+                        onTap: () => showWalletActionSheet(context, WalletAction.withdraw),
+                      ),
                     ),
-                    ActionSquareButton(
-                      icon: Icons.swap_horiz,
-                      label: l10n.convert,
-                      onTap: () => showWalletActionSheet(context, WalletAction.convert),
+                    Expanded(
+                      child: ActionSquareButton(
+                        icon: Icons.swap_horiz,
+                        label: l10n.convert,
+                        onTap: () => showWalletActionSheet(context, WalletAction.convert),
+                      ),
                     ),
-                    ActionSquareButton(
-                      icon: Icons.send_rounded,
-                      label: l10n.transfer,
-                      onTap: () => showWalletActionSheet(context, WalletAction.transfer),
+                    Expanded(
+                      child: ActionSquareButton(
+                        icon: Icons.send_rounded,
+                        label: l10n.transfer,
+                        onTap: () => showWalletActionSheet(context, WalletAction.transfer),
+                      ),
                     ),
                   ],
                 ),
