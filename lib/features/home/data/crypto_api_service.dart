@@ -2,15 +2,16 @@ import 'dart:convert';
 
 import 'package:bittarget/features/home/data/crypto_asset_model.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class CryptoApiService {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 10)));
 
   static const List<String> targetSymbols = [
     'BTCUSDT',
     'ETHUSDT',
     'SOLUSDT',
-    'TONUSDT',
+    'TONUSDT', // см. инструкцию: заменить на 'GRAMUSDT', если пара живая
     'ADAUSDT',
     'XRPUSDT',
     'DOTUSDT',
@@ -29,6 +30,7 @@ class CryptoApiService {
     'ETH': 'Эфириум',
     'SOL': 'Солана',
     'TON': 'Тонкоин',
+    'GRAM': 'Грам',
     'ADA': 'Кардано',
     'XRP': 'Рипл',
     'DOT': 'Полкадот',
@@ -42,13 +44,29 @@ class CryptoApiService {
     'NEAR': 'Ниар',
   };
 
+  // Если по монете не было сделок дольше этого времени, считаем, что пара не торгуется
+  static const Duration _maxStale = Duration(hours: 12);
+
   // Цены, изменение и максимум за 24 часа: все монеты одним запросом
   Future<List<CryptoAsset>> fetchMarketData() async {
     final response = await _dio.get('https://api.binance.com/api/v3/ticker/24hr', queryParameters: {'symbols': jsonEncode(targetSymbols)});
 
     final List data = response.data;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
 
-    return data.map((item) {
+    final fresh = data.where((item) {
+      final closeTime = (item['closeTime'] as num?)?.toInt() ?? 0;
+      final stale = nowMs - closeTime > _maxStale.inMilliseconds;
+      if (stale) {
+        debugPrint('Пропускаем ${item['symbol']}: нет сделок с ${DateTime.fromMillisecondsSinceEpoch(closeTime)}');
+      }
+      return !stale;
+    }).toList();
+
+    // Если отфильтровалось всё (например, неверные часы на устройстве), показываем как есть
+    final source = fresh.isEmpty ? data : fresh;
+
+    return source.map((item) {
       final symbol = item['symbol'].toString().replaceAll('USDT', '');
       final change = double.parse(item['priceChangePercent']);
 
