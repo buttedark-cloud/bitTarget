@@ -70,7 +70,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
     return MultiBlocListener(
       listeners: [
-        // Кто-то попросил открыть вкладку (меню, кнопка Trade, аватар)
         BlocListener<NavCubit, int>(
           listener: (context, index) {
             // Пока пользователь вышел, никуда, кроме профиля, пускать нельзя
@@ -149,7 +148,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
     // Пока пользователь вышел, доступен только профиль: остальное тускнеет и не нажимается
     final locked = !loggedIn && index != _profileIndex;
 
-    // Expanded: каждый пункт получает равную долю ширины вместо жёстких 65 пикселей
     return Expanded(
       child: Opacity(
         opacity: locked ? 0.3 : 1,

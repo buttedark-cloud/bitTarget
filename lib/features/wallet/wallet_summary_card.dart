@@ -23,7 +23,7 @@ class WalletSummaryCard extends StatelessWidget {
       glow: true,
       padding: const EdgeInsets.all(20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Wrap переносит плашку на вторую строку, если рядом нет места
           Wrap(

@@ -21,68 +21,56 @@ class MarketHeroCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isEn = Localizations.localeOf(context).languageCode == 'en';
     final accent = asset.isPositive ? AppColors.neonGreen : AppColors.neonRed;
+    final highText = Text('${l10n.high24h}: ${formatUsd(asset.high24h)}', style: AppTypography.caption);
 
     return GlassCard(
       glow: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // На очень узком экране «Макс.» уходит во вторую строку, чтобы название монеты не обрезалось
+          final narrow = constraints.maxWidth < 270;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: PressEffect(
-                    onTap: () => _showAssetSelector(context),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CoinIcon(symbol: asset.symbol, size: 46),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      isEn ? asset.nameEn : asset.nameRu,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppTypography.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
-                                    ),
+              // Первая строка: иконка, название с парой, справа плашка процента и сразу под ней максимум за сутки
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CoinIcon(symbol: asset.symbol, size: 46),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: PressEffect(
+                        onTap: () => _showAssetSelector(context),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    isEn ? asset.nameEn : asset.nameRu,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(asset.symbol, style: AppTypography.caption),
-                                  const Icon(Icons.arrow_drop_down, color: AppColors.neonGreen),
-                                ],
-                              ),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  formatUsd(asset.price),
-                                  style: AppTypography.displayMedium.copyWith(fontSize: 22, color: accent),
                                 ),
-                              ),
-                            ],
-                          ),
+                                const Icon(Icons.arrow_drop_down, color: AppColors.neonGreen),
+                              ],
+                            ),
+                            Text(asset.pair, style: AppTypography.caption),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Правая колонка уменьшается, если не хватает места
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: Column(
+                  const SizedBox(width: 12),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Container(
@@ -93,17 +81,37 @@ class MarketHeroCard extends StatelessWidget {
                           style: AppTypography.badgeGreen.copyWith(color: Colors.black, fontWeight: FontWeight.w800),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text('${l10n.high24h}: ${formatUsd(asset.high24h)}', style: AppTypography.caption),
+                      if (!narrow) ...[const SizedBox(height: 5), highText],
                     ],
                   ),
-                ),
+                ],
               ),
+              const SizedBox(height: 10),
+              // Вторая строка: цена слева (и максимум справа только на узком экране)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(formatUsd(asset.price), style: AppTypography.displayMedium.copyWith(fontSize: 22, color: accent)),
+                    ),
+                  ),
+                  if (narrow) ...[
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: highText),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              NeonChart(points: asset.sparkline, isPositive: asset.isPositive, height: 90),
             ],
-          ),
-          const SizedBox(height: 16),
-          NeonChart(points: asset.sparkline, isPositive: asset.isPositive, height: 90),
-        ],
+          );
+        },
       ),
     );
   }

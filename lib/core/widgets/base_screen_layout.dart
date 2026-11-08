@@ -10,7 +10,7 @@ class BaseScreenLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Трендовый градиент: от чисто черного сверху к глубокому темно-серому снизу
+        // градиент от чисто черного сверху к глубокому темно-серому снизу
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -27,7 +27,7 @@ class BaseScreenLayout extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              // --- ЕДИНЫЙ ЛОГОТИП ДЛЯ ВСЕХ ЭКРАНОВ ---
+              // ЕДИНЫЙ ЛОГОТИП ДЛЯ ВСЕХ ЭКРАНОВ
               Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
