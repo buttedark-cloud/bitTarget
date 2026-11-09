@@ -1,17 +1,51 @@
-# BitTarget
+<p align="center">
+  <img src="docs/logo2.png" alt="BitTarget" width="640">
+</p>
 
-[English](README.md) | **Русский**
+<p align="center"><a href="README.md">English</a> | <b>Русский</b></p>
 
-![BitTarget](docs/logo2.png)
+<p align="center">
+  Симулятор крипто-торговли на Flutter: живой рынок, интерактивный график, стакан заявок и демо-кошелёк.
+</p>
 
-Симулятор крипто-торговли на Flutter. Данные рынка настоящие и живые (открытый API Binance), а деньги ненастоящие: есть демо-кошелёк, экран торговли с интерактивным графиком и стаканом заявок и обзор портфеля. Это проект для портфолио, в котором упор сделан на чистую архитектуру, данные в реальном времени и спокойную обработку сбоев.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/state-Cubit%20(flutter__bloc)-00c853" alt="Cubit">
+  <img src="https://img.shields.io/badge/tests-41%20passing-00c853" alt="Тесты">
+</p>
 
-![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
-![State](https://img.shields.io/badge/state-Cubit%20(flutter__bloc)-00c853)
-![Tests](https://img.shields.io/badge/tests-41%20passing-00c853)
+Данные рынка настоящие и живые (открытый API Binance), а деньги ненастоящие: есть демо-кошелёк, экран торговли с интерактивным графиком и стаканом заявок и обзор портфеля. Это проект для портфолио, в котором упор сделан на чистую архитектуру, данные в реальном времени и спокойную обработку сбоев.
 
 > Цены берутся из открытых данных Binance. Ключ API не нужен, реальные деньги не используются.
+
+## Скриншоты
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/bittarget1.png" alt="Главная и торговля" width="100%"></td>
+    <td width="50%"><img src="docs/bittarget3.png" alt="Кошелёк, профиль и обработка ошибок" width="100%"></td>
+  </tr>
+</table>
+
+## Демо
+
+<!--
+  КАК ДОБАВИТЬ ВИДЕО (GitHub не проигрывает файлы из папки репозитория):
+  1. Открой этот README на github.com и нажми на карандаш (Edit).
+  2. Перетащи первый файл .mp4 в окно редактора. GitHub загрузит его и вставит ссылку вида
+     https://github.com/user-attachments/assets/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  3. Скопируй эту ссылку, удали строку, которую вставил GitHub, и вставь ссылку в src="" ниже.
+  4. То же самое для второго видео.
+  Каждое видео должно быть меньше 10 МБ (запиши короткую запись экрана).
+-->
+
+<table>
+  <tr>
+    <td width="50%"><video src="PASTE_VIDEO_1_LINK_HERE" controls muted width="100%"></video></td>
+    <td width="50%"><video src="PASTE_VIDEO_2_LINK_HERE" controls muted width="100%"></video></td>
+  </tr>
+</table>
 
 ## Возможности
 
@@ -85,6 +119,7 @@ lib/
     └── profile/
 test/                             модульные тесты
 assets/                           иконки монет и картинки
+docs/                             логотип и скриншоты для этого README
 ```
 
 Решения, которые стоит отметить:
