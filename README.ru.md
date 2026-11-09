@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/975183b3-45f7-4c7d-9047-456b833f45a8
 <p align="center">
   <img src="docs/logo2.png" alt="BitTarget" width="640">
 </p>
@@ -28,22 +30,13 @@
   </tr>
 </table>
 
-## Демо
+## Демо 
 
-<!--
-  КАК ДОБАВИТЬ ВИДЕО (GitHub не проигрывает файлы из папки репозитория):
-  1. Открой этот README на github.com и нажми на карандаш (Edit).
-  2. Перетащи первый файл .mp4 в окно редактора. GitHub загрузит его и вставит ссылку вида
-     https://github.com/user-attachments/assets/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-  3. Скопируй эту ссылку, удали строку, которую вставил GitHub, и вставь ссылку в src="" ниже.
-  4. То же самое для второго видео.
-  Каждое видео должно быть меньше 10 МБ (запиши короткую запись экрана).
--->
+
 
 <table>
   <tr>
-    <td width="50%"><video src="PASTE_VIDEO_1_LINK_HERE" controls muted width="100%"></video></td>
-    <td width="50%"><video src="PASTE_VIDEO_2_LINK_HERE" controls muted width="100%"></video></td>
+    <td width="100%"><video src="https://github.com/user-attachments/assets/e98e2d6b-d250-4c1b-9fe1-b1b527f452bf" controls muted width="100%"></video></td>
   </tr>
 </table>
 
