@@ -33,10 +33,9 @@
 
 
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/bacde174-9fb2-48cf-aae6-356108aa9672" controls muted width="60%"></video>
-</p>
-
+<div align="center">
+  <video src="[https://github.com](https://github.com/user-attachments/assets/bacde174-9fb2-48cf-aae6-356108aa9672)" controls muted style="max-width: 350px; width: 100%;"></video>
+</div>
 
 ## Возможности
 
