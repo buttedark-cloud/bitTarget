@@ -31,13 +31,15 @@ Market data is real and live (public Binance API), while the money is simulated:
 ## Demo
 
 <!--
-  HOW TO ADD THE VIDEOS (GitHub does not play files from the repository folder):
-  1. Open this README on github.com and click the pencil icon (Edit).
-  2. Drag the first .mp4 file into the editor. GitHub uploads it and inserts a link like
-     https://github.com/user-attachments/assets/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-  3. Copy that link, delete the line GitHub inserted, and paste the link into src="" below.
-  4. Repeat for the second video.
-  The videos must be under 10 MB each (use a short screen recording).
+  
+
+https://github.com/user-attachments/assets/8180dbeb-c2b1-494c-a7cb-910626179b46
+
+
+
+https://github.com/user-attachments/assets/addca212-77cc-4d3b-9c5a-21c9d6061651
+
+
 -->
 
 <table>
