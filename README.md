@@ -30,23 +30,10 @@ Market data is real and live (public Binance API), while the money is simulated:
 
 ## Demo
 
-<!--
-  
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/08fa9c64-f6f4-4a40-a983-da9d214aa811" controls muted style="max-width: 350px; width: 100%;"></video>
+</div>
 
-
-
-
-
--->
-
-<table>
-
-
-  <tr>
-    <td width="50%"><video src="[PASTE_VIDEO_2_LINK_HERE](https://github.com/user-attachments/assets/addca212-77cc-4d3b-9c5a-21c9d6061651
-)" controls muted width="100%"></video></td>
-  </tr>
-</table>
 
 ## Features
 
