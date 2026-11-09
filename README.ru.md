@@ -32,10 +32,10 @@
 ## Демо 
 
 
-
 <div align="center">
-  <video src="[https://github.com](https://github.com/user-attachments/assets/bacde174-9fb2-48cf-aae6-356108aa9672)" controls muted style="max-width: 350px; width: 100%;"></video>
+  <video src="https://github.com/user-attachments/assets/a8fbe8a5-f42a-4129-a863-4bb336ac1a28" controls muted style="max-width: 350px; width: 100%;"></video>
 </div>
+
 
 ## Возможности
 
