@@ -33,15 +33,10 @@
 
 
 
-<table>
-  <tr>
-    <td width="10%"><video src="
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/bacde174-9fb2-48cf-aae6-356108aa9672" controls muted width="60%"></video>
+</p>
 
-https://github.com/user-attachments/assets/76fdc747-8b64-4c63-98a7-83e1d0d08bcb
-
-" controls muted width="100%"></video></td>
-  </tr>
-</table>
 
 ## Возможности
 
