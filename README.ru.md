@@ -1,5 +1,4 @@
 
-https://github.com/user-attachments/assets/975183b3-45f7-4c7d-9047-456b833f45a8
 <p align="center">
   <img src="docs/logo2.png" alt="BitTarget" width="640">
 </p>
@@ -36,7 +35,11 @@ https://github.com/user-attachments/assets/975183b3-45f7-4c7d-9047-456b833f45a8
 
 <table>
   <tr>
-    <td width="10%"><video src="https://github.com/user-attachments/assets/e98e2d6b-d250-4c1b-9fe1-b1b527f452bf" controls muted width="100%"></video></td>
+    <td width="10%"><video src="
+
+https://github.com/user-attachments/assets/76fdc747-8b64-4c63-98a7-83e1d0d08bcb
+
+" controls muted width="100%"></video></td>
   </tr>
 </table>
 
