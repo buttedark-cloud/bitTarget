@@ -1,17 +1,51 @@
-# BitTarget
+<p align="center">
+  <img src="docs/logo2.png" alt="BitTarget" width="640">
+</p>
 
-**English** | [Русский](README.ru.md)
+<p align="center"><b>English</b> | <a href="README.ru.md">Русский</a></p>
 
-![BitTarget](docs/bittarget-banner-en.png)
+<p align="center">
+  A crypto trading simulator built with Flutter: live market data, an interactive chart, an order book and a demo wallet.
+</p>
 
-A crypto trading simulator built with Flutter. Market data is real and live (public Binance API), while the money is simulated: you get a demo wallet, a trading screen with an interactive chart and order book, and a portfolio overview. It is a portfolio project focused on clean architecture, real-time data and graceful handling of failures.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/state-Cubit%20(flutter__bloc)-00c853" alt="Cubit">
+  <img src="https://img.shields.io/badge/tests-41%20passing-00c853" alt="Tests">
+</p>
 
-![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
-![State](https://img.shields.io/badge/state-Cubit%20(flutter__bloc)-00c853)
-![Tests](https://img.shields.io/badge/tests-41%20passing-00c853)
+Market data is real and live (public Binance API), while the money is simulated: you get a demo wallet, a trading screen with an interactive chart and order book, and a portfolio overview. It is a portfolio project focused on clean architecture, real-time data and graceful handling of failures.
 
 > Prices come from Binance public endpoints. No API key is needed and no real money is involved.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/bittarget2.png" alt="Home and Trade" width="100%"></td>
+    <td width="50%"><img src="docs/bittarget4.png" alt="Wallet, Profile and error handling" width="100%"></td>
+  </tr>
+</table>
+
+## Demo
+
+<!--
+  HOW TO ADD THE VIDEOS (GitHub does not play files from the repository folder):
+  1. Open this README on github.com and click the pencil icon (Edit).
+  2. Drag the first .mp4 file into the editor. GitHub uploads it and inserts a link like
+     https://github.com/user-attachments/assets/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  3. Copy that link, delete the line GitHub inserted, and paste the link into src="" below.
+  4. Repeat for the second video.
+  The videos must be under 10 MB each (use a short screen recording).
+-->
+
+<table>
+  <tr>
+    <td width="50%"><video src="PASTE_VIDEO_1_LINK_HERE" controls muted width="100%"></video></td>
+    <td width="50%"><video src="PASTE_VIDEO_2_LINK_HERE" controls muted width="100%"></video></td>
+  </tr>
+</table>
 
 ## Features
 
@@ -85,6 +119,7 @@ lib/
     └── profile/
 test/                             unit tests
 assets/                           coin icons and images
+docs/                             logo, screenshots for this README
 ```
 
 Design decisions worth mentioning:
