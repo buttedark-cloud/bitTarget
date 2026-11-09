@@ -36,7 +36,7 @@ https://github.com/user-attachments/assets/975183b3-45f7-4c7d-9047-456b833f45a8
 
 <table>
   <tr>
-    <td width="100%"><video src="https://github.com/user-attachments/assets/e98e2d6b-d250-4c1b-9fe1-b1b527f452bf" controls muted width="100%"></video></td>
+    <td width="10%"><video src="https://github.com/user-attachments/assets/e98e2d6b-d250-4c1b-9fe1-b1b527f452bf" controls muted width="100%"></video></td>
   </tr>
 </table>
 
